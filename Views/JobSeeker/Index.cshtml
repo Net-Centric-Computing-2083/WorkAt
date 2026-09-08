@@ -1,0 +1,169 @@
+﻿@model WorkAt.Models.JobSeeker
+
+@{
+    ViewData["Title"] = "JobSeeker Dashboard";
+}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2>JobSeeker Dashboard</h2>
+        <p class="text-muted">
+            Welcome, @Model.FirstName @Model.LastName!
+        </p>
+    </div>
+
+    <!-- Profile -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">My Profile</h4>
+        </div>
+
+        <div class="card-body">
+
+            <p>
+                <strong>Name:</strong>
+                @Model.FirstName @Model.LastName
+            </p>
+
+            <p>
+                <strong>Phone:</strong>
+                @(Model.Phone ?? "Not provided")
+            </p>
+
+            <p class="mb-0">
+                <strong>Address:</strong>
+                @(Model.Address ?? "Not provided")
+            </p>
+
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <h5>My Resume</h5>
+
+                    @if (Model.Resume == null)
+                    {
+                        <p class="text-muted">
+                            You have not created your resume yet.
+                        </p>
+
+                        <a asp-controller="Resume"
+                           asp-action="Create"
+                           class="btn btn-primary">
+                            Create Resume
+                        </a>
+                    }
+                    else
+                    {
+                        <p>
+                            Your resume is available.
+                        </p>
+
+                        <a asp-controller="Resume"
+                           asp-action="Index"
+                           class="btn btn-primary">
+                            View My Resume
+                        </a>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <h5>Find Jobs</h5>
+
+                    <p class="text-muted">
+                        Search for available job opportunities.
+                    </p>
+
+                    <a asp-controller="Job"
+                       asp-action="Index"
+                       class="btn btn-success">
+                        Browse Jobs
+                    </a>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Applications -->
+    <div class="card">
+
+        <div class="card-header">
+            <h4 class="mb-0">My Applications</h4>
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.Applications != null &&
+                 Model.Applications.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-striped">
+
+                        <thead>
+                            <tr>
+                                <th>Job</th>
+                                <th>Company</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var application in Model.Applications)
+                            {
+                                <tr>
+                                    <td>
+                                        @(application.Job?.Title ?? "Unknown")
+                                    </td>
+
+                                    <td>
+                                        @(application.Job?.Company?.CompanyName
+                                            ?? "Unknown")
+                                    </td>
+
+                                    <td>
+                                        @application.AppliedDate.ToLocalTime()
+                                        .ToString("yyyy-MM-dd")
+                                    </td>
+
+                                    <td>
+                                        @application.Status
+                                    </td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">
+                    You have not applied for any jobs yet.
+                </p>
+            }
+
+        </div>
+
+    </div>
+
+</div>
