@@ -1,0 +1,136 @@
+﻿@model WorkAt.Models.Resume?
+
+@{
+    ViewData["Title"] = "My Resume";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Resume</h2>
+
+        @if (Model == null)
+        {
+            <a asp-action="Create"
+               class="btn btn-primary">
+                Create Resume
+            </a>
+        }
+        else
+        {
+            <a asp-action="Edit"
+               class="btn btn-primary">
+                Edit Resume
+            </a>
+        }
+    </div>
+
+    @if (Model == null)
+    {
+        <div class="alert alert-info">
+            You have not created your resume yet.
+        </div>
+    }
+    else
+    {
+        <!-- Resume Information -->
+        <div class="card mb-4">
+
+            <div class="card-header">
+                <h4 class="mb-0">Resume Information</h4>
+            </div>
+
+            <div class="card-body">
+
+                <h5>Summary</h5>
+
+                <p>
+                    @(Model.Summary ?? "No summary provided.")
+                </p>
+
+                <hr />
+
+                <h5>Education</h5>
+
+                <p>
+                    @(Model.Education ?? "No education information provided.")
+                </p>
+
+                <hr />
+
+                <h5>Experience</h5>
+
+                <p>
+                    @(Model.Experience ?? "No experience information provided.")
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- Skills -->
+        <div class="card">
+
+            <div class="card-header
+                d-flex
+                justify-content-between
+                align-items-center">
+
+                <h4 class="mb-0">Skills</h4>
+
+                <a asp-action="AddSkill"
+                   class="btn btn-success btn-sm">
+                    Add Skill
+                </a>
+
+            </div>
+
+            <div class="card-body">
+
+                @if (Model.ResumeSkills != null &&
+                     Model.ResumeSkills.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2">
+
+                        @foreach (var resumeSkill in Model.ResumeSkills)
+                        {
+                            <div class="border rounded p-2">
+
+                                <span>
+                                    @resumeSkill.Skill?.Name
+                                </span>
+
+                                <form asp-action="RemoveSkill"
+                                      method="post"
+                                      class="d-inline">
+
+                                    <input type="hidden"
+                                           name="skillId"
+                                           value="@resumeSkill.SkillId" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger ms-2">
+                                        Remove
+                                    </button>
+
+                                </form>
+
+                            </div>
+                        }
+
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">
+                        You have not added any skills yet.
+                    </p>
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>

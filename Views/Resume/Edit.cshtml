@@ -1,0 +1,67 @@
+﻿@model WorkAt.Models.Resume
+
+@{
+    ViewData["Title"] = "Edit Resume";
+}
+
+<div class="container mt-4">
+
+    <h2>Edit Resume</h2>
+
+    <form asp-action="Edit" method="post">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger"></div>
+
+        <input type="hidden" asp-for="ResumeId" />
+
+        <div class="mb-3">
+            <label asp-for="Summary" class="form-label"></label>
+
+            <textarea asp-for="Summary"
+                      class="form-control"
+                      rows="5"></textarea>
+
+            <span asp-validation-for="Summary"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Education" class="form-label"></label>
+
+            <textarea asp-for="Education"
+                      class="form-control"
+                      rows="5"></textarea>
+
+            <span asp-validation-for="Education"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Experience" class="form-label"></label>
+
+            <textarea asp-for="Experience"
+                      class="form-control"
+                      rows="5"></textarea>
+
+            <span asp-validation-for="Experience"
+                  class="text-danger"></span>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Save Changes
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

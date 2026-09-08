@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Add Skill";
+}
+
+<div class="container mt-4">
+
+    <h2>Add Skill</h2>
+
+    <form asp-action="AddSkill" method="post">
+
+        <div class="mb-3">
+            <label class="form-label">
+                Select a Skill
+            </label>
+
+            <select name="skillId" class="form-select">
+
+                <option value="">
+                    -- Select a skill --
+                </option>
+
+                @foreach (var skill in ViewBag.Skills)
+                {
+                    <option value="@skill.SkillId">
+                        @skill.Name
+                    </option>
+                }
+
+            </select>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Add Skill
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-secondary">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
