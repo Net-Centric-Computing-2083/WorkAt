@@ -1,0 +1,72 @@
+﻿@model IEnumerable<WorkAt.Models.Application>
+
+@{
+    ViewData["Title"] = "My Applications";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">My Applications</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You have not applied for any jobs yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Applied Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var application in Model)
+                    {
+                        <tr>
+                            <td>
+                                @application.Job?.Title
+                            </td>
+
+                            <td>
+                                @application.Job?.Company?.CompanyName
+                            </td>
+
+                            <td>
+                                @application.AppliedDate.ToLocalTime().ToString("dd MMM yyyy")
+                            </td>
+
+                            <td>
+                                @application.Status
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    }
+
+</div>

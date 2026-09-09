@@ -1,0 +1,112 @@
+﻿@model IEnumerable<WorkAt.Models.Application>
+
+@{
+    ViewData["Title"] = "Applications for My Jobs";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Applications for My Jobs</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No applications have been received for your jobs yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Applicant</th>
+                        <th>Applied Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var application in Model)
+                    {
+                        <tr>
+                            <td>
+                                @application.Job?.Title
+                            </td>
+
+                            <td>
+                                @application.JobSeeker?.FirstName
+                                @application.JobSeeker?.LastName
+                            </td>
+
+                            <td>
+                                @application.AppliedDate
+                                .ToLocalTime()
+                                .ToString("dd MMM yyyy")
+                            </td>
+
+                            <td>
+                                @application.Status
+                            </td>
+
+                            <td>
+                                @if (application.Status == "Pending")
+                                {
+                                    <form asp-action="Accept"
+                                          method="post"
+                                          class="d-inline">
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@application.ApplicationId" />
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm">
+                                            Accept
+                                        </button>
+                                    </form>
+
+                                    <form asp-action="Reject"
+                                          method="post"
+                                          class="d-inline">
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@application.ApplicationId" />
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm">
+                                            Reject
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        No action available
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    }
+
+</div>
