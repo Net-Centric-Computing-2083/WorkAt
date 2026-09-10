@@ -1,0 +1,104 @@
+﻿@model IEnumerable<WorkAt.Models.Job>
+
+@{
+    ViewData["Title"] = "Available Jobs";
+}
+
+<div class="container mt-4">
+
+   
+    <div class="mb-4">
+        <h1>Available Jobs</h1>
+        <p class="text-muted">
+            Explore the latest job opportunities from companies.
+        </p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No jobs are currently available.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var job in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+
+                            <!-- Job Title -->
+                            <h4 class="card-title mb-2">
+                                @job.Title
+                            </h4>
+
+           
+                            <!-- Company -->
+                            <p class="card-text mb-2">
+                                <strong>Company:</strong>
+                                @(job.Company?.CompanyName ?? "Company not specified")
+                            </p>
+
+                            <!-- Location -->
+                            @if (!string.IsNullOrEmpty(job.Location))
+                            {
+                                <p class="card-text mb-2">
+                                    <strong>Location:</strong>
+                                    @job.Location
+                                </p>
+                            }
+
+                            <!-- Employment Type -->
+                            @if (!string.IsNullOrEmpty(job.EmploymentType))
+                            {
+                                <p class="card-text mb-2">
+                                    <strong>Employment Type:</strong>
+                                    @job.EmploymentType
+                                </p>
+                            }
+
+                            <!-- Salary -->
+                            @if (!string.IsNullOrEmpty(job.Salary))
+                            {
+                                <p class="card-text mb-2">
+                                    <strong>Salary:</strong>
+                                    @job.Salary
+                                </p>
+                            }
+
+                            <!-- Posted Date -->
+                            <p class="card-text mb-2">
+                                <strong>Posted:</strong>
+                                @job.PostedDate.ToLocalTime().ToShortDateString()
+                            </p>
+
+                            <!-- Deadline -->
+                            @if (job.Deadline.HasValue)
+                            {
+                                <p class="card-text mb-3">
+                                    <strong>Deadline:</strong>
+                                    @job.Deadline.Value.ToShortDateString()
+                                </p>
+                            }
+
+                            <!-- View Details Button -->
+                            <div class="mt-auto">
+                                <a asp-controller="Jobs"
+                                   asp-action="Details"
+                                   asp-route-id="@job.JobId"
+                                   class="btn btn-primary">
+                                    View Details
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+  
+
+</div>

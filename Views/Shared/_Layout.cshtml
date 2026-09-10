@@ -66,15 +66,31 @@
                             </a>
                         </li>
 
-                        <!-- Privacy -->
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Privacy">
-                                Privacy
-                            </a>
-                        </li>
+                        <!-- Jobs - only for JobSeekers and guests -->
+                        @if (!SignInManager.IsSignedIn(User) ||
+                             User.IsInRole("JobSeeker"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Jobs"
+                                   asp-action="Index">
+                                    Jobs
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Privacy - only for guests -->
+                        @if (!SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-area=""
+                                   asp-controller="Home"
+                                   asp-action="Privacy">
+                                    Privacy
+                                </a>
+                            </li>
+                        }
 
                         <!-- JobSeeker Dashboard -->
                         @if (SignInManager.IsSignedIn(User) &&
@@ -89,7 +105,7 @@
                             </li>
                         }
 
-                        <!-- Company Dashboard -->
+                        <!-- Company Dashboard and My Jobs -->
                         @if (SignInManager.IsSignedIn(User) &&
                              User.IsInRole("Company"))
                         {
@@ -98,6 +114,14 @@
                                    asp-controller="Company"
                                    asp-action="Index">
                                     Company Dashboard
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Job"
+                                   asp-action="Index">
+                                    My Jobs
                                 </a>
                             </li>
                         }

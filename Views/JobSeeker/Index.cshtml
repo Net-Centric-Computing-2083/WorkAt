@@ -6,6 +6,20 @@
 
 <div class="container mt-4">
 
+    @* Success message after updating profile *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    }
+
     <div class="mb-4">
         <h2>JobSeeker Dashboard</h2>
         <p class="text-muted">
@@ -15,6 +29,7 @@
 
     <!-- Profile -->
     <div class="card mb-4">
+
         <div class="card-header">
             <h4 class="mb-0">My Profile</h4>
         </div>
@@ -28,13 +43,23 @@
 
             <p>
                 <strong>Phone:</strong>
-                @(Model.Phone ?? "Not provided")
+                @(string.IsNullOrWhiteSpace(Model.Phone)
+                    ? "Not provided"
+                    : Model.Phone)
             </p>
 
-            <p class="mb-0">
+            <p class="mb-3">
                 <strong>Address:</strong>
-                @(Model.Address ?? "Not provided")
+                @(string.IsNullOrWhiteSpace(Model.Address)
+                    ? "Not provided"
+                    : Model.Address)
             </p>
+
+            <a asp-controller="JobSeeker"
+               asp-action="EditProfile"
+               class="btn btn-primary">
+                Edit Profile
+            </a>
 
         </div>
     </div>
@@ -42,6 +67,7 @@
     <!-- Quick Actions -->
     <div class="row mb-4">
 
+        <!-- Resume -->
         <div class="col-md-6 mb-3">
             <div class="card h-100">
                 <div class="card-body">
@@ -77,6 +103,7 @@
             </div>
         </div>
 
+        <!-- Find Jobs -->
         <div class="col-md-6 mb-3">
             <div class="card h-100">
                 <div class="card-body">
@@ -87,7 +114,7 @@
                         Search for available job opportunities.
                     </p>
 
-                    <a asp-controller="Job"
+                    <a asp-controller="Jobs"
                        asp-action="Index"
                        class="btn btn-success">
                         Browse Jobs
@@ -134,12 +161,12 @@
                                     </td>
 
                                     <td>
-                                        @(application.Job?.Company?.CompanyName
-                                            ?? "Unknown")
+                                        @(application.Job?.Company?.CompanyName ?? "Unknown")
                                     </td>
 
                                     <td>
-                                        @application.AppliedDate.ToLocalTime()
+                                        @application.AppliedDate
+                                        .ToLocalTime()
                                         .ToString("yyyy-MM-dd")
                                     </td>
 
