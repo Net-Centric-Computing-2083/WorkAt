@@ -175,17 +175,19 @@ namespace WorkAt.Controllers
             var application = await GetCompanyOwnedApplication(id);
 
             if (application == null)
-            {
                 return NotFound();
+
+            if (application.Status != "Pending")
+            {
+                TempData["ErrorMessage"] = "This application has already been processed.";
+                return RedirectToAction(nameof(CompanyApplications));
             }
 
             application.Status = "Accepted";
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] =
-                "Application has been accepted.";
-
+            TempData["SuccessMessage"] = "Application has been accepted.";
             return RedirectToAction(nameof(CompanyApplications));
         }
 
@@ -201,17 +203,19 @@ namespace WorkAt.Controllers
             var application = await GetCompanyOwnedApplication(id);
 
             if (application == null)
-            {
                 return NotFound();
+
+            if (application.Status != "Pending")
+            {
+                TempData["ErrorMessage"] = "This application has already been processed.";
+                return RedirectToAction(nameof(CompanyApplications));
             }
 
             application.Status = "Rejected";
 
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] =
-                "Application has been rejected.";
-
+            TempData["SuccessMessage"] = "Application has been rejected.";
             return RedirectToAction(nameof(CompanyApplications));
         }
 
