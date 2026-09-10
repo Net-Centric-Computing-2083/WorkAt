@@ -1,84 +1,108 @@
 ﻿@model WorkAt.Models.Job
 
 @{
-    ViewData["Title"] = "Job Details";
+    ViewData["Title"] = "Edit Job";
 }
 
-<h1>Job Details</h1>
+<h1>Edit Job</h1>
 
 <hr />
 
-<div>
-    <dl class="row">
+<div class="row">
+    <div class="col-md-6">
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
+        <form asp-action="Edit" method="post">
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
+            <input type="hidden" asp-for="JobId" />
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Requirements)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Requirements)
-        </dd>
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger">
+            </div>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Location)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Location)
-        </dd>
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title"
+                      class="text-danger">
+                </span>
+            </div>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Salary)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Salary)
-        </dd>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description"
+                          class="form-control"
+                          rows="4"></textarea>
+                <span asp-validation-for="Description"
+                      class="text-danger">
+                </span>
+            </div>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.EmploymentType)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.EmploymentType)
-        </dd>
+            <div class="mb-3">
+                <label asp-for="Requirements" class="form-label"></label>
+                <textarea asp-for="Requirements"
+                          class="form-control"
+                          rows="4"></textarea>
+                <span asp-validation-for="Requirements"
+                      class="text-danger">
+                </span>
+            </div>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.PostedDate)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.PostedDate)
-        </dd>
+            <div class="mb-3">
+                <label asp-for="Location" class="form-label"></label>
+                <input asp-for="Location" class="form-control" />
+                <span asp-validation-for="Location"
+                      class="text-danger">
+                </span>
+            </div>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Deadline)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Deadline)
-        </dd>
+            <div class="mb-3">
+                <label asp-for="Salary" class="form-label"></label>
+                <input asp-for="Salary" class="form-control" />
+                <span asp-validation-for="Salary"
+                      class="text-danger">
+                </span>
+            </div>
 
-    </dl>
+            <div class="mb-3">
+                <label asp-for="EmploymentType"
+                       class="form-label">
+                </label>
+                <input asp-for="EmploymentType"
+                       class="form-control" />
+                <span asp-validation-for="EmploymentType"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Deadline"
+                       class="form-label">
+                </label>
+                <input asp-for="Deadline"
+                       type="date"
+                       class="form-control" />
+                <span asp-validation-for="Deadline"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Save Changes
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Back to My Jobs
+            </a>
+
+        </form>
+
+    </div>
 </div>
 
-<div>
-    <a asp-action="Edit"
-       asp-route-id="@Model.JobId"
-       class="btn btn-warning">
-        Edit
-    </a>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Back to My Jobs
-    </a>
-</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
