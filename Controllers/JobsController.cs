@@ -17,6 +17,7 @@ namespace WorkAt.Controllers
         public async Task<IActionResult> Index()
         {
             var jobs = await _context.Jobs
+                .Include(j => j.Company)
                 .OrderByDescending(j => j.PostedDate)
                 .ToListAsync();
 
