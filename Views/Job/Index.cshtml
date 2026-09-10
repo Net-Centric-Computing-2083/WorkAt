@@ -1,0 +1,67 @@
+﻿@model IEnumerable<WorkAt.Models.Job>
+
+@{
+    ViewData["Title"] = "My Jobs";
+}
+
+<h1>My Jobs</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Job</a>
+</p>
+
+@if (!Model.Any())
+{
+    <p>You have not posted any jobs yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Location</th>
+                <th>Employment Type</th>
+                <th>Salary</th>
+                <th>Posted Date</th>
+                <th>Deadline</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var job in Model)
+            {
+                <tr>
+                    <td>@job.Title</td>
+                    <td>@job.Location</td>
+                    <td>@job.EmploymentType</td>
+                    <td>@job.Salary</td>
+                    <td>@job.PostedDate.ToShortDateString()</td>
+                    <td>
+                        @(job.Deadline?.ToShortDateString() ?? "No deadline")
+                    </td>
+                    <td>
+                        <a asp-action="Details"
+                           asp-route-id="@job.JobId"
+                           class="btn btn-info btn-sm">
+                            Details
+                        </a>
+
+                        <a asp-action="Edit"
+                           asp-route-id="@job.JobId"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@job.JobId"
+                           class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,84 @@
+﻿@model WorkAt.Models.Job
+
+@{
+    ViewData["Title"] = "Job Details";
+}
+
+<h1>Job Details</h1>
+
+<hr />
+
+<div>
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            Title
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Title
+        </dd>
+
+        <dt class="col-sm-3">
+            Description
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Description
+        </dd>
+
+        <dt class="col-sm-3">
+            Requirements
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Requirements
+        </dd>
+
+        <dt class="col-sm-3">
+            Location
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Location
+        </dd>
+
+        <dt class="col-sm-3">
+            Salary
+        </dt>
+        <dd class="col-sm-9">
+            @Model.Salary
+        </dd>
+
+        <dt class="col-sm-3">
+            Employment Type
+        </dt>
+        <dd class="col-sm-9">
+            @Model.EmploymentType
+        </dd>
+
+        <dt class="col-sm-3">
+            Posted Date
+        </dt>
+        <dd class="col-sm-9">
+            @Model.PostedDate
+        </dd>
+
+        <dt class="col-sm-3">
+            Deadline
+        </dt>
+        <dd class="col-sm-9">
+            @(Model.Deadline?.ToShortDateString() ?? "No deadline")
+        </dd>
+
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit"
+       asp-route-id="@Model.JobId"
+       class="btn btn-warning">
+        Edit
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to My Jobs
+    </a>
+</div>
