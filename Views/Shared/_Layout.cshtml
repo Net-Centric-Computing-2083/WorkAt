@@ -89,6 +89,19 @@
                             </li>
                         }
 
+                        <!-- Company Dashboard -->
+                        @if (SignInManager.IsSignedIn(User) &&
+                             User.IsInRole("Company"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Company"
+                                   asp-action="Index">
+                                    Company Dashboard
+                                </a>
+                            </li>
+                        }
+
                     </ul>
 
                     <!-- Login / Register / Logout -->
