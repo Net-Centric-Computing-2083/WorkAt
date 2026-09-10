@@ -1,0 +1,84 @@
+﻿@model WorkAt.Models.Job
+
+@{
+    ViewData["Title"] = "Job Details";
+}
+
+<h1>Job Details</h1>
+
+<hr />
+
+<div>
+    <dl class="row">
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Title)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Title)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Description)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Description)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Requirements)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Requirements)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Location)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Location)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Salary)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Salary)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.EmploymentType)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.EmploymentType)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.PostedDate)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.PostedDate)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Deadline)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Deadline)
+        </dd>
+
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit"
+       asp-route-id="@Model.JobId"
+       class="btn btn-warning">
+        Edit
+    </a>
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Back to My Jobs
+    </a>
+</div>

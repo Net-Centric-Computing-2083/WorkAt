@@ -1,0 +1,58 @@
+﻿
+@model IEnumerable<WorkAt.Models.Job>
+
+@{
+    ViewData["Title"] = "Jobs";
+}
+
+<h1>Available Jobs</h1>
+
+@if (!Model.Any())
+{
+    <p>No jobs are currently available.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var job in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+
+                        <h4 class="card-title">
+                            @job.Title
+                        </h4>
+
+                        <p class="card-text">
+                            <strong>Location:</strong> @job.Location
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Employment Type:</strong> @job.EmploymentType
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Salary:</strong> @job.Salary
+                        </p>
+
+                        <p class="card-text">
+                            <strong>Posted:</strong>
+                            @job.PostedDate.ToShortDateString()
+                        </p>
+
+                        @if (job.Deadline.HasValue)
+                        {
+                            <p class="card-text">
+                                <strong>Deadline:</strong>
+                                @job.Deadline.Value.ToShortDateString()
+                            </p>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
