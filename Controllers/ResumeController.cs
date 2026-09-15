@@ -29,8 +29,8 @@ namespace WorkAt.Controllers
 
             var jobSeeker = await _context.JobSeekers
                 .Include(js => js.Resume)
-                    .ThenInclude(r => r!.ResumeSkills)
-                        .ThenInclude(rs => rs.Skill)
+                .ThenInclude(r => r!.ResumeSkills)
+                .ThenInclude(rs => rs.Skill)
                 .FirstOrDefaultAsync(js => js.UserId == userId);
 
             if (jobSeeker == null)
@@ -63,7 +63,6 @@ namespace WorkAt.Controllers
                 return NotFound();
             }
 
-            // A JobSeeker can have only one resume.
             var existingResume = await _context.Resumes
                 .FirstOrDefaultAsync(r =>
                     r.JobSeekerId == jobSeeker.JobSeekerId);
@@ -78,7 +77,6 @@ namespace WorkAt.Controllers
                 return View(resume);
             }
 
-            // Assign the resume to the logged-in JobSeeker.
             resume.JobSeekerId = jobSeeker.JobSeekerId;
 
             _context.Resumes.Add(resume);
@@ -137,7 +135,6 @@ namespace WorkAt.Controllers
                 return View(resume);
             }
 
-            // Get the actual resume belonging to the logged-in user.
             var existingResume = jobSeeker.Resume;
 
             existingResume.Summary = resume.Summary;
@@ -199,7 +196,6 @@ namespace WorkAt.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            // Check whether the skill exists.
             var skill = await _context.Skills
                 .FindAsync(skillId);
 
@@ -208,7 +204,6 @@ namespace WorkAt.Controllers
                 return NotFound();
             }
 
-            // Prevent adding the same skill twice.
             var alreadyAdded = await _context.ResumeSkills
                 .AnyAsync(rs =>
                     rs.ResumeId == jobSeeker.Resume.ResumeId &&

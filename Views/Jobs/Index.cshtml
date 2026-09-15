@@ -6,43 +6,136 @@
 
 <div class="container mt-4">
 
-   
     <div class="mb-4">
         <h1>Available Jobs</h1>
+
         <p class="text-muted">
             Explore the latest job opportunities from companies.
         </p>
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info">
-            No jobs are currently available.
+    <form asp-controller="Jobs"
+          asp-action="Index"
+          method="get"
+          class="mb-5">
+
+        <div class="row g-3">
+
+            <div class="col-md-5">
+                <label for="keyword" class="form-label">
+                    Keyword
+                </label>
+
+                <input type="text"
+                       id="keyword"
+                       name="keyword"
+                       class="form-control"
+                       placeholder="Job title or keyword"
+                       value="@ViewBag.Keyword" />
+            </div>
+
+            <div class="col-md-3">
+                <label for="location" class="form-label">
+                    Location
+                </label>
+
+                <input type="text"
+                       id="location"
+                       name="location"
+                       class="form-control"
+                       placeholder="e.g. Kathmandu"
+                       value="@ViewBag.Location" />
+            </div>
+
+            <div class="col-md-3">
+                <label for="employmentType" class="form-label">
+                    Employment Type
+                </label>
+
+                <select id="employmentType"
+                        name="employmentType"
+                        class="form-select">
+
+                    <option value="">All Types</option>
+
+                    <option value="Full Time"
+                            selected="@(ViewBag.EmploymentType == "Full Time")">
+                        Full Time
+                    </option>
+
+                    <option value="Part Time"
+                            selected="@(ViewBag.EmploymentType == "Part Time")">
+                        Part Time
+                    </option>
+
+                    <option value="Internship"
+                            selected="@(ViewBag.EmploymentType == "Internship")">
+                        Internship
+                    </option>
+
+                    <option value="Contract"
+                            selected="@(ViewBag.EmploymentType == "Contract")">
+                        Contract
+                    </option>
+
+                    <option value="Developer"
+                            selected="@(ViewBag.EmploymentType == "Developer")">
+                        Developer
+                    </option>
+
+                    <option value="Manager"
+                            selected="@(ViewBag.EmploymentType == "Manager")">
+                        Manager
+                    </option>
+
+                </select>
+            </div>
+
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="submit"
+                        class="btn btn-primary w-100">
+                    Search
+                </button>
+            </div>
+
         </div>
-    }
-    else
+
+        <div class="mt-3">
+            <a asp-controller="Jobs"
+               asp-action="Index"
+               class="btn btn-outline-secondary">
+                Clear Filters
+            </a>
+        </div>
+
+    </form>
+
+    @if (Model.Any())
     {
+        <div class="mb-3">
+            <h3>Available Jobs</h3>
+        </div>
+
         <div class="row">
+
             @foreach (var job in Model)
             {
                 <div class="col-md-6 col-lg-4 mb-4">
+
                     <div class="card h-100 shadow-sm">
+
                         <div class="card-body d-flex flex-column">
 
-                            <!-- Job Title -->
                             <h4 class="card-title mb-2">
                                 @job.Title
                             </h4>
 
-           
-                            <!-- Company -->
                             <p class="card-text mb-2">
                                 <strong>Company:</strong>
                                 @(job.Company?.CompanyName ?? "Company not specified")
                             </p>
 
-                            <!-- Location -->
-                            @if (!string.IsNullOrEmpty(job.Location))
+                            @if (!string.IsNullOrWhiteSpace(job.Location))
                             {
                                 <p class="card-text mb-2">
                                     <strong>Location:</strong>
@@ -50,8 +143,7 @@
                                 </p>
                             }
 
-                            <!-- Employment Type -->
-                            @if (!string.IsNullOrEmpty(job.EmploymentType))
+                            @if (!string.IsNullOrWhiteSpace(job.EmploymentType))
                             {
                                 <p class="card-text mb-2">
                                     <strong>Employment Type:</strong>
@@ -59,8 +151,7 @@
                                 </p>
                             }
 
-                            <!-- Salary -->
-                            @if (!string.IsNullOrEmpty(job.Salary))
+                            @if (!string.IsNullOrWhiteSpace(job.Salary))
                             {
                                 <p class="card-text mb-2">
                                     <strong>Salary:</strong>
@@ -68,37 +159,44 @@
                                 </p>
                             }
 
-                            <!-- Posted Date -->
                             <p class="card-text mb-2">
                                 <strong>Posted:</strong>
                                 @job.PostedDate.ToLocalTime().ToShortDateString()
                             </p>
 
-                            <!-- Deadline -->
                             @if (job.Deadline.HasValue)
                             {
                                 <p class="card-text mb-3">
                                     <strong>Deadline:</strong>
-                                    @job.Deadline.Value.ToShortDateString()
+                                    @job.Deadline.Value.ToLocalTime().ToShortDateString()
                                 </p>
                             }
 
-                            <!-- View Details Button -->
                             <div class="mt-auto">
-                                <a asp-controller="Jobs"
+
+                                <a asp-controller="JobSearch"
                                    asp-action="Details"
                                    asp-route-id="@job.JobId"
                                    class="btn btn-primary">
                                     View Details
                                 </a>
+
                             </div>
 
                         </div>
+
                     </div>
+
                 </div>
             }
+
         </div>
     }
-  
+    else
+    {
+        <div class="alert alert-info">
+            No jobs match your search.
+        </div>
+    }
 
 </div>
