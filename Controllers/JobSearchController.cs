@@ -4,15 +4,16 @@ using WorkAt.Data;
 
 namespace WorkAt.Controllers
 {
-    public class JobsController : Controller
+    public class JobSearchController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public JobsController(ApplicationDbContext context)
+        public JobSearchController(ApplicationDbContext context)
         {
             _context = context;
         }
 
+        // GET: /JobSearch
         public async Task<IActionResult> Index(
             string? keyword,
             string? location,
@@ -22,15 +23,15 @@ namespace WorkAt.Controllers
                 .Include(j => j.Company)
                 .AsQueryable();
 
+            // Keyword search
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 jobs = jobs.Where(j =>
                     j.Title.Contains(keyword) ||
-                    j.Description.Contains(keyword) ||
-                    (j.Requirements != null &&
-                     j.Requirements.Contains(keyword)));
+                    j.Description.Contains(keyword));
             }
 
+            // Location filter
             if (!string.IsNullOrWhiteSpace(location))
             {
                 jobs = jobs.Where(j =>
@@ -38,6 +39,7 @@ namespace WorkAt.Controllers
                     j.Location.Contains(location));
             }
 
+            // Employment type filter
             if (!string.IsNullOrWhiteSpace(employmentType))
             {
                 jobs = jobs.Where(j =>
@@ -53,6 +55,26 @@ namespace WorkAt.Controllers
             ViewBag.EmploymentType = employmentType;
 
             return View(result);
+        }
+
+        // GET: /JobSearch/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var job = await _context.Jobs
+                .Include(j => j.Company)
+                .FirstOrDefaultAsync(j => j.JobId == id);
+
+            if (job == null)
+            {
+                return NotFound();
+            }
+
+            return View(job);
         }
     }
 }

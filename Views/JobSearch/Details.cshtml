@@ -1,0 +1,128 @@
+﻿@model WorkAt.Models.Job
+
+@{
+    ViewData["Title"] = "Job Details";
+}
+
+<div class="container py-5">
+
+    <div class="mb-4">
+        <a asp-controller="JobSearch"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            ← Back to Jobs
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+
+            <div class="mb-4">
+                <h1 class="mb-2">@Model.Title</h1>
+
+                @if (Model.Company != null)
+                {
+                    <h5 class="text-muted">
+                        @Model.Company.CompanyName
+                    </h5>
+                }
+            </div>
+
+            <div class="row g-4 mb-4">
+
+                @if (!string.IsNullOrWhiteSpace(Model.Location))
+                {
+                    <div class="col-md-6">
+                        <strong>Location</strong>
+                        <p class="text-muted mb-0">
+                            @Model.Location
+                        </p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.EmploymentType))
+                {
+                    <div class="col-md-6">
+                        <strong>Employment Type</strong>
+                        <p class="text-muted mb-0">
+                            @Model.EmploymentType
+                        </p>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Salary))
+                {
+                    <div class="col-md-6">
+                        <strong>Salary</strong>
+                        <p class="text-muted mb-0">
+                            @Model.Salary
+                        </p>
+                    </div>
+                }
+
+                <div class="col-md-6">
+                    <strong>Posted Date</strong>
+                    <p class="text-muted mb-0">
+                        @Model.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")
+                    </p>
+                </div>
+
+                @if (Model.Deadline.HasValue)
+                {
+                    <div class="col-md-6">
+                        <strong>Application Deadline</strong>
+                        <p class="text-muted mb-0">
+                            @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")
+                        </p>
+                    </div>
+                }
+
+            </div>
+
+            <hr />
+
+            <div class="my-4">
+                <h3>Job Description</h3>
+
+                <p class="mt-3">
+                    @Model.Description
+                </p>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Requirements))
+            {
+                <div class="my-4">
+                    <h3>Requirements</h3>
+
+                    <p class="mt-3">
+                        @Model.Requirements
+                    </p>
+                </div>
+            }
+
+            @if (Model.Company != null)
+            {
+                <hr />
+
+                <div class="my-4">
+                    <h3>About the Company</h3>
+
+                    <p class="mt-3">
+                        @Model.Company.CompanyName
+                    </p>
+                </div>
+            }
+
+            <div class="mt-4">
+                <a asp-controller="Application"
+                   asp-action="Create"
+                   asp-route-jobId="@Model.JobId"
+                   class="btn btn-primary">
+                    Apply Now
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
