@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @using WorkAt.Models
 @inject SignInManager<ApplicationUser> SignInManager
 
@@ -92,7 +92,7 @@
                             </li>
                         }
 
-                        <!-- JobSeeker Dashboard -->
+                        <!-- JobSeeker Dashboard & My Applications -->
                         @if (SignInManager.IsSignedIn(User) &&
                              User.IsInRole("JobSeeker"))
                         {
@@ -103,9 +103,17 @@
                                     Dashboard
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Application"
+                                   asp-action="MyApplications">
+                                    My Applications
+                                </a>
+                            </li>
                         }
 
-                        <!-- Company Dashboard and My Jobs -->
+                        <!-- Company Dashboard, My Jobs, and Applications -->
                         @if (SignInManager.IsSignedIn(User) &&
                              User.IsInRole("Company"))
                         {
@@ -122,6 +130,14 @@
                                    asp-controller="Job"
                                    asp-action="Index">
                                     My Jobs
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark"
+                                   asp-controller="Application"
+                                   asp-action="CompanyApplications">
+                                    Job Applications
                                 </a>
                             </li>
                         }

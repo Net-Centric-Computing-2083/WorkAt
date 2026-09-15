@@ -1,4 +1,4 @@
-﻿@model WorkAt.Models.JobSeeker
+@model WorkAt.Models.JobSeeker
 
 @{
     ViewData["Title"] = "JobSeeker Dashboard";
@@ -129,8 +129,11 @@
     <!-- Applications -->
     <div class="card">
 
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">My Applications</h4>
+            <a asp-controller="Application" asp-action="MyApplications" class="btn btn-sm btn-outline-primary">
+                View All Applications
+            </a>
         </div>
 
         <div class="card-body">
@@ -140,7 +143,7 @@
             {
                 <div class="table-responsive">
 
-                    <table class="table table-striped">
+                    <table class="table table-striped align-middle">
 
                         <thead>
                             <tr>
@@ -148,6 +151,7 @@
                                 <th>Company</th>
                                 <th>Applied Date</th>
                                 <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
 
@@ -157,7 +161,7 @@
                             {
                                 <tr>
                                     <td>
-                                        @(application.Job?.Title ?? "Unknown")
+                                        <strong>@(application.Job?.Title ?? "Unknown")</strong>
                                     </td>
 
                                     <td>
@@ -171,7 +175,27 @@
                                     </td>
 
                                     <td>
-                                        @application.Status
+                                        @if (application.Status == "Accepted")
+                                        {
+                                            <span class="badge bg-success">Accepted</span>
+                                        }
+                                        else if (application.Status == "Rejected")
+                                        {
+                                            <span class="badge bg-danger">Rejected</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <a asp-controller="Application"
+                                           asp-action="Details"
+                                           asp-route-id="@application.ApplicationId"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Details
+                                        </a>
                                     </td>
                                 </tr>
                             }

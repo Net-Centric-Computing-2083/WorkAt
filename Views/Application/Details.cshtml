@@ -1,0 +1,214 @@
+@model WorkAt.Models.Application
+
+@{
+    ViewData["Title"] = "Application Details";
+    var isCompany = User.IsInRole("Company");
+    var isJobSeeker = User.IsInRole("JobSeeker");
+}
+
+<div class="container mt-4">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Application Details</h2>
+            <p class="text-muted mb-0">Application ID #@Model.ApplicationId</p>
+        </div>
+        <div>
+            @if (isCompany)
+            {
+                <a asp-action="CompanyApplications" class="btn btn-outline-secondary">
+                    &larr; Back to Company Applications
+                </a>
+            }
+            else
+            {
+                <a asp-action="MyApplications" class="btn btn-outline-secondary">
+                    &larr; Back to My Applications
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Application Status Banner -->
+    <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center p-3">
+            <div>
+                <strong>Applied On:</strong> @Model.AppliedDate.ToLocalTime().ToString("MMM dd, yyyy - hh:mm tt")
+            </div>
+            <div>
+                <strong>Status:</strong>
+                @if (Model.Status == "Accepted")
+                {
+                    <span class="badge bg-success fs-6">Accepted</span>
+                }
+                else if (Model.Status == "Rejected")
+                {
+                    <span class="badge bg-danger fs-6">Rejected</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark fs-6">Pending</span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Job Details Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Job Information</h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="card-title">@Model.Job?.Title</h4>
+                    <p class="text-muted">
+                        <strong>Company:</strong> @(Model.Job?.Company?.CompanyName ?? "N/A")
+                    </p>
+                    <hr />
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Location</dt>
+                        <dd class="col-sm-8">@(Model.Job?.Location ?? "Not specified")</dd>
+
+                        <dt class="col-sm-4">Employment Type</dt>
+                        <dd class="col-sm-8">@(Model.Job?.EmploymentType ?? "Not specified")</dd>
+
+                        <dt class="col-sm-4">Salary</dt>
+                        <dd class="col-sm-8">@(Model.Job?.Salary ?? "Not specified")</dd>
+
+                        <dt class="col-sm-4">Posted Date</dt>
+                        <dd class="col-sm-8">@Model.Job?.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")</dd>
+                    </dl>
+                    @if (!string.IsNullOrWhiteSpace(Model.Job?.Description))
+                    {
+                        <hr />
+                        <h6>Description</h6>
+                        <p class="small text-muted mb-0">@Model.Job.Description</p>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Job?.Requirements))
+                    {
+                        <hr />
+                        <h6>Requirements</h6>
+                        <p class="small text-muted mb-0">@Model.Job.Requirements</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Applicant / Resume Information Card -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Applicant Information</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.JobSeeker != null)
+                    {
+                        <h4>@Model.JobSeeker.FirstName @Model.JobSeeker.LastName</h4>
+                        <dl class="row mb-3">
+                            <dt class="col-sm-4">Email</dt>
+                            <dd class="col-sm-8">@(Model.JobSeeker.User?.Email ?? "N/A")</dd>
+
+                            <dt class="col-sm-4">Phone</dt>
+                            <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Phone) ? "Not provided" : Model.JobSeeker.Phone)</dd>
+
+                            <dt class="col-sm-4">Address</dt>
+                            <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Address) ? "Not provided" : Model.JobSeeker.Address)</dd>
+                        </dl>
+
+                        <hr />
+                        <h5 class="mb-3">Resume & Qualifications</h5>
+
+                        @if (Model.JobSeeker.Resume != null)
+                        {
+                            <div class="mb-3">
+                                <h6>Summary</h6>
+                                <p class="small text-muted">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Resume.Summary) ? "No summary provided." : Model.JobSeeker.Resume.Summary)</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6>Education</h6>
+                                <p class="small text-muted">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Resume.Education) ? "No education details provided." : Model.JobSeeker.Resume.Education)</p>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6>Experience</h6>
+                                <p class="small text-muted">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Resume.Experience) ? "No experience details provided." : Model.JobSeeker.Resume.Experience)</p>
+                            </div>
+
+                            @if (Model.JobSeeker.Resume.ResumeSkills != null && Model.JobSeeker.Resume.ResumeSkills.Any())
+                            {
+                                <div>
+                                    <h6>Skills</h6>
+                                    <div>
+                                        @foreach (var rs in Model.JobSeeker.Resume.ResumeSkills)
+                                        {
+                                            <span class="badge bg-secondary me-1 mb-1">@rs.Skill?.Name</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary text-muted mb-0">
+                                Applicant has not attached or created a resume profile yet.
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Applicant profile information is unavailable.</p>
+                    }
+                </div>
+
+                @if (isCompany)
+                {
+                    <div class="card-footer bg-white border-top-0 p-3 text-end">
+                        @if (Model.Status == "Pending")
+                        {
+                            <form asp-action="Accept" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.ApplicationId" />
+                                <button type="submit" class="btn btn-success me-2">
+                                    Accept Application
+                                </button>
+                            </form>
+
+                            <form asp-action="Reject" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.ApplicationId" />
+                                <button type="submit" class="btn btn-danger">
+                                    Reject Application
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Status finalized (@Model.Status)</span>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+</div>

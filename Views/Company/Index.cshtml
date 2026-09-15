@@ -1,4 +1,4 @@
-﻿@model WorkAt.Models.Company
+@model WorkAt.Models.Company
 
 @{
     ViewData["Title"] = "Company Dashboard";
@@ -87,8 +87,11 @@
                     <a asp-action="Edit" class="btn btn-outline-primary w-100 mb-2">
                         <i class="bi bi-pencil me-1"></i> Edit Profile
                     </a>
-                    <a asp-controller="Job" asp-action="Index" class="btn btn-outline-secondary w-100">
+                    <a asp-controller="Job" asp-action="Index" class="btn btn-outline-secondary w-100 mb-2">
                         <i class="bi bi-briefcase me-1"></i> View My Jobs
+                    </a>
+                    <a asp-controller="Application" asp-action="CompanyApplications" class="btn btn-outline-success w-100">
+                        <i class="bi bi-person-lines-fill me-1"></i> Job Applications
                     </a>
                 </div>
             </div>
