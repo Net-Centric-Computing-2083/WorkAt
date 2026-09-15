@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +24,14 @@ namespace WorkAt.Controllers
         // =========================================================
         // JOBSEEKER: APPLY FOR A JOB
         // =========================================================
+
+        [Authorize(Roles = "JobSeeker")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(int jobId)
+        {
+            return await Apply(jobId);
+        }
 
         [Authorize(Roles = "JobSeeker")]
         [HttpPost]
@@ -119,7 +127,7 @@ namespace WorkAt.Controllers
             // Only retrieve applications belonging to this JobSeeker
             var applications = await _context.Applications
                 .Include(a => a.Job)
-                    .ThenInclude(j => j.Company)
+                    .ThenInclude(j => j!.Company)
                 .Where(a => a.JobSeekerId == jobSeeker.JobSeekerId)
                 .OrderByDescending(a => a.AppliedDate)
                 .ToListAsync();
@@ -155,12 +163,88 @@ namespace WorkAt.Controllers
             var applications = await _context.Applications
                 .Include(a => a.Job)
                 .Include(a => a.JobSeeker)
+                    .ThenInclude(js => js!.User)
+                .Include(a => a.JobSeeker)
+                    .ThenInclude(js => js!.Resume)
                 .Where(a => a.Job != null &&
                             a.Job.CompanyId == company.CompanyId)
                 .OrderByDescending(a => a.AppliedDate)
                 .ToListAsync();
 
             return View(applications);
+        }
+
+        // =========================================================
+        // DETAILS: VIEW APPLICATION DETAILS (JOBSEEKER OR COMPANY)
+        // =========================================================
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            if (User.IsInRole("JobSeeker"))
+            {
+                var jobSeeker = await _context.JobSeekers
+                    .FirstOrDefaultAsync(js => js.UserId == userId);
+
+                if (jobSeeker == null)
+                {
+                    return NotFound("JobSeeker profile not found.");
+                }
+
+                // Strict ownership check: Application must belong to this JobSeeker
+                var application = await _context.Applications
+                    .Include(a => a.Job)
+                        .ThenInclude(j => j!.Company)
+                    .FirstOrDefaultAsync(a => a.ApplicationId == id &&
+                                              a.JobSeekerId == jobSeeker.JobSeekerId);
+
+                if (application == null)
+                {
+                    return NotFound();
+                }
+
+                return View(application);
+            }
+            else if (User.IsInRole("Company"))
+            {
+                var company = await _context.Companies
+                    .FirstOrDefaultAsync(c => c.UserId == userId);
+
+                if (company == null)
+                {
+                    return NotFound("Company profile not found.");
+                }
+
+                // Strict ownership check: Application's Job must belong to this Company
+                var application = await _context.Applications
+                    .Include(a => a.Job)
+                    .Include(a => a.JobSeeker)
+                        .ThenInclude(js => js!.User)
+                    .Include(a => a.JobSeeker)
+                        .ThenInclude(js => js!.Resume)
+                            .ThenInclude(r => r!.ResumeSkills)
+                                .ThenInclude(rs => rs.Skill)
+                    .FirstOrDefaultAsync(a => a.ApplicationId == id &&
+                                              a.Job != null &&
+                                              a.Job.CompanyId == company.CompanyId);
+
+                if (application == null)
+                {
+                    return NotFound();
+                }
+
+                return View(application);
+            }
+
+            return Forbid();
         }
 
         // =========================================================

@@ -1,16 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorkAt.Data;
+using WorkAt.Models;
 
 namespace WorkAt.Controllers
 {
     public class JobSearchController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public JobSearchController(ApplicationDbContext context)
+        public JobSearchController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: /JobSearch
@@ -72,6 +78,22 @@ namespace WorkAt.Controllers
             if (job == null)
             {
                 return NotFound();
+            }
+
+            if (User.Identity?.IsAuthenticated == true && User.IsInRole("JobSeeker"))
+            {
+                var userId = _userManager.GetUserId(User);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    var application = await _context.Applications
+                        .FirstOrDefaultAsync(a => a.JobId == id && a.JobSeeker != null && a.JobSeeker.UserId == userId);
+
+                    if (application != null)
+                    {
+                        ViewBag.HasApplied = true;
+                        ViewBag.ApplicationStatus = application.Status;
+                    }
+                }
             }
 
             return View(job);

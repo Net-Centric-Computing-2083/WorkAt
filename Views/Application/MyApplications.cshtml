@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WorkAt.Models.Application>
+@model IEnumerable<WorkAt.Models.Application>
 
 @{
     ViewData["Title"] = "My Applications";
@@ -10,15 +10,17 @@
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
@@ -31,14 +33,15 @@
     else
     {
         <div class="table-responsive">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped align-middle">
 
-                <thead>
+                <thead class="table-light">
                     <tr>
                         <th>Job Title</th>
                         <th>Company</th>
                         <th>Applied Date</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
 
@@ -47,11 +50,11 @@
                     {
                         <tr>
                             <td>
-                                @application.Job?.Title
+                                <strong>@application.Job?.Title</strong>
                             </td>
 
                             <td>
-                                @application.Job?.Company?.CompanyName
+                                @(application.Job?.Company?.CompanyName ?? "N/A")
                             </td>
 
                             <td>
@@ -59,7 +62,26 @@
                             </td>
 
                             <td>
-                                @application.Status
+                                @if (application.Status == "Accepted")
+                                {
+                                    <span class="badge bg-success">Accepted</span>
+                                }
+                                else if (application.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger">Rejected</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-action="Details"
+                                   asp-route-id="@application.ApplicationId"
+                                   class="btn btn-sm btn-outline-primary">
+                                    View Details
+                                </a>
                             </td>
                         </tr>
                     }

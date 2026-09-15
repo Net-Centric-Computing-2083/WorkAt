@@ -1,4 +1,4 @@
-﻿@model IEnumerable<WorkAt.Models.Application>
+@model IEnumerable<WorkAt.Models.Application>
 
 @{
     ViewData["Title"] = "Applications for My Jobs";
@@ -10,8 +10,17 @@
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
@@ -24,15 +33,16 @@
     else
     {
         <div class="table-responsive">
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped align-middle">
 
-                <thead>
+                <thead class="table-light">
                     <tr>
                         <th>Job Title</th>
-                        <th>Applicant</th>
+                        <th>Applicant Name</th>
+                        <th>Contact Email</th>
                         <th>Applied Date</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -41,65 +51,79 @@
                     {
                         <tr>
                             <td>
-                                @application.Job?.Title
+                                <strong>@application.Job?.Title</strong>
                             </td>
 
                             <td>
-                                @application.JobSeeker?.FirstName
-                                @application.JobSeeker?.LastName
+                                @application.JobSeeker?.FirstName @application.JobSeeker?.LastName
                             </td>
 
                             <td>
-                                @application.AppliedDate
-                                .ToLocalTime()
-                                .ToString("dd MMM yyyy")
+                                @(application.JobSeeker?.User?.Email ?? "N/A")
                             </td>
 
                             <td>
-                                @application.Status
+                                @application.AppliedDate.ToLocalTime().ToString("dd MMM yyyy")
                             </td>
 
                             <td>
-                                @if (application.Status == "Pending")
+                                @if (application.Status == "Accepted")
                                 {
-                                    <form asp-action="Accept"
-                                          method="post"
-                                          class="d-inline">
-
-                                        <input type="hidden"
-                                               name="id"
-                                               value="@application.ApplicationId" />
-
-                                        @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="btn btn-success btn-sm">
-                                            Accept
-                                        </button>
-                                    </form>
-
-                                    <form asp-action="Reject"
-                                          method="post"
-                                          class="d-inline">
-
-                                        <input type="hidden"
-                                               name="id"
-                                               value="@application.ApplicationId" />
-
-                                        @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="btn btn-danger btn-sm">
-                                            Reject
-                                        </button>
-                                    </form>
+                                    <span class="badge bg-success">Accepted</span>
+                                }
+                                else if (application.Status == "Rejected")
+                                {
+                                    <span class="badge bg-danger">Rejected</span>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">
-                                        No action available
-                                    </span>
+                                    <span class="badge bg-warning text-dark">Pending</span>
                                 }
+                            </td>
+
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <a asp-action="Details"
+                                       asp-route-id="@application.ApplicationId"
+                                       class="btn btn-info btn-sm text-white">
+                                        Review Profile
+                                    </a>
+
+                                    @if (application.Status == "Pending")
+                                    {
+                                        <form asp-action="Accept"
+                                              method="post"
+                                              class="d-inline">
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@application.ApplicationId" />
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="btn btn-success btn-sm">
+                                                Accept
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="Reject"
+                                              method="post"
+                                              class="d-inline">
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@application.ApplicationId" />
+
+                                            @Html.AntiForgeryToken()
+
+                                            <button type="submit"
+                                                    class="btn btn-danger btn-sm">
+                                                Reject
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }

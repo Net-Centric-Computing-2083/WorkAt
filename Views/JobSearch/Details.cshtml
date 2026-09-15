@@ -1,10 +1,26 @@
-﻿@model WorkAt.Models.Job
+@model WorkAt.Models.Job
 
 @{
     ViewData["Title"] = "Job Details";
 }
 
 <div class="container py-5">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <div class="mb-4">
         <a asp-controller="JobSearch"
@@ -114,12 +130,37 @@
             }
 
             <div class="mt-4">
-                <a asp-controller="Application"
-                   asp-action="Create"
-                   asp-route-jobId="@Model.JobId"
-                   class="btn btn-primary">
-                    Apply Now
-                </a>
+                @if (User.IsInRole("JobSeeker"))
+                {
+                    if (ViewBag.HasApplied == true)
+                    {
+                        <div class="alert alert-success d-inline-block mb-0">
+                            <strong>Application Status:</strong> @ViewBag.ApplicationStatus (You have applied for this job)
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-controller="Application"
+                              asp-action="Create"
+                              method="post"
+                              class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="jobId" value="@Model.JobId" />
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Apply Now
+                            </button>
+                        </form>
+                    }
+                }
+                else if (!User.Identity?.IsAuthenticated ?? true)
+                {
+                    <a asp-area="Identity"
+                       asp-page="/Account/Login"
+                       asp-route-returnUrl="@Url.Action("Details", "JobSearch", new { id = Model.JobId })"
+                       class="btn btn-primary btn-lg">
+                        Apply Now
+                    </a>
+                }
             </div>
 
         </div>
