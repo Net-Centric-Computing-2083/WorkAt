@@ -1,6 +1,4 @@
-/* ==========================================================================
-   WorkAt — Premium Minimalist Design System (Apple / Linear / Notion inspired)
-   ========================================================================== */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -53,6 +51,17 @@ html {
     min-height: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+/* Hide scrollbars visually across Webkit browsers */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 body {
@@ -64,6 +73,8 @@ body {
     flex-direction: column;
     min-height: 100vh;
     line-height: 1.5;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 /* Typography Hierarchy */
@@ -134,15 +145,27 @@ a {
 }
 
 .workat-brand {
-    font-weight: 700;
-    font-size: 1.25rem;
-    letter-spacing: -0.04em;
     color: var(--text-primary);
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    text-decoration: none;
+    line-height: 1;
 }
 
+.workat-brand-name {
+    font-weight: 700;
+    font-size: 2.0rem;
+    letter-spacing: -0.04em;
+}
+
+.workat-brand-subtitle {
+    margin-top: 3px;
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.06em;
+}
 .workat-brand-badge {
     background: var(--text-primary);
     color: var(--bg-surface);
