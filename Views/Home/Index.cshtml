@@ -1,8 +1,149 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@using Microsoft.AspNetCore.Identity
+@using WorkAt.Models
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    ViewData["Title"] = "Find Opportunities. Build Teams.";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (SignInManager.IsSignedIn(User))
+{
+    @if (User.IsInRole("JobSeeker"))
+    {
+        <div class="py-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+                <div>
+                    <h1 class="h2 mb-1">Welcome back</h1>
+                    <p class="text-muted mb-0">Search open roles, track applications, and maintain your profile.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary">
+                        Find Jobs
+                    </a>
+                    <a asp-controller="JobSeeker" asp-action="Index" class="btn btn-secondary">
+                        View Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">Explore Jobs</h3>
+                            <p class="text-secondary small mb-3">Browse available positions across engineering, product, management, and more.</p>
+                            <a asp-controller="Jobs" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                Browse Listings &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">My Applications</h3>
+                            <p class="text-secondary small mb-3">Check the status of your submitted job applications in real-time.</p>
+                            <a asp-controller="Application" asp-action="MyApplications" class="btn btn-sm btn-outline-secondary">
+                                Track Applications &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">My Resume</h3>
+                            <p class="text-secondary small mb-3">Keep your education, experience, and skills up-to-date for employers.</p>
+                            <a asp-controller="Resume" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                                Manage Resume &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (User.IsInRole("Company"))
+    {
+        <div class="py-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+                <div>
+                    <h1 class="h2 mb-1">Company Workspace</h1>
+                    <p class="text-muted mb-0">Manage job listings, review incoming applicants, and update your organization profile.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Job" asp-action="Create" class="btn btn-primary">
+                        Post a Job
+                    </a>
+                    <a asp-controller="Company" asp-action="Index" class="btn btn-secondary">
+                        Company Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">Post a New Job</h3>
+                            <p class="text-secondary small mb-3">Publish open roles with detailed requirements, compensation, and deadlines.</p>
+                            <a asp-controller="Job" asp-action="Create" class="btn btn-sm btn-primary">
+                                Create Listing &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">Manage Listings</h3>
+                            <p class="text-secondary small mb-3">View and edit active job openings posted by your company.</p>
+                            <a asp-controller="Job" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                                View Jobs &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">Candidate Applications</h3>
+                            <p class="text-secondary small mb-3">Review candidate resumes and process hiring decisions with one click.</p>
+                            <a asp-controller="Application" asp-action="CompanyApplications" class="btn btn-sm btn-outline-secondary">
+                                Review Candidates &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <!-- Guest Hero -->
+    <section class="hero-section">
+        <h1 class="hero-title">
+            Find your next opportunity.<br />
+            Find the right talent.
+        </h1>
+        <p class="hero-desc">
+            WorkAt connects job seekers with companies to discover opportunities, apply for jobs, and find the right talent.
+
+        </p>
+        <div class="hero-cta">
+            <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary btn-lg">
+                Find Jobs
+            </a>
+            <a asp-controller="Account" asp-action="Register" asp-route-role="Company" class="btn btn-secondary btn-lg">
+                Post a Job
+            </a>
+        </div>
+    </section>
+
+
+}

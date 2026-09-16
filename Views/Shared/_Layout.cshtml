@@ -7,184 +7,118 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>@ViewData["Title"] - WorkAt</title>
 
-    <script type="importmap"></script>
-
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
-
-    <link rel="stylesheet"
-          href="~/WorkAt.styles.css"
-          asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WorkAt.styles.css" asp-append-version="true" />
 </head>
-
 <body>
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-
-            <div class="container-fluid">
-
+        <nav class="navbar navbar-expand-md workat-navbar">
+            <div class="container">
                 <!-- Brand -->
-                <a class="navbar-brand"
-                   asp-area=""
-                   asp-controller="Home"
-                   asp-action="Index">
+                <a class="workat-brand" asp-controller="Home" asp-action="Index">
                     WorkAt
                 </a>
 
-                <!-- Mobile menu button -->
-                <button class="navbar-toggler"
+                <!-- Mobile menu toggle -->
+                <button class="navbar-toggler border-0 shadow-none"
                         type="button"
                         data-bs-toggle="collapse"
-                        data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent"
+                        data-bs-target="#navbarContent"
+                        aria-controls="navbarContent"
                         aria-expanded="false"
                         aria-label="Toggle navigation">
-
                     <span class="navbar-toggler-icon"></span>
-
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav mx-auto mb-2 mb-md-0 gap-1">
 
-                    <ul class="navbar-nav flex-grow-1">
-
-                        <!-- Home -->
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-area=""
-                               asp-controller="Home"
-                               asp-action="Index">
-                                Home
-                            </a>
-                        </li>
-
-                        <!-- Jobs - only for JobSeekers and guests -->
-                        @if (!SignInManager.IsSignedIn(User) ||
-                             User.IsInRole("JobSeeker"))
+                        <!-- Public / Guest Navigation -->
+                        <!-- Job Seeker Navigation -->
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("JobSeeker"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Jobs"
-                                   asp-action="Index">
-                                    Jobs
-                                </a>
-                            </li>
-                        }
-
-                        <!-- Privacy - only for guests -->
-                        @if (!SignInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-area=""
-                                   asp-controller="Home"
-                                   asp-action="Privacy">
-                                    Privacy
-                                </a>
-                            </li>
-                        }
-
-                        <!-- JobSeeker Dashboard & My Applications -->
-                        @if (SignInManager.IsSignedIn(User) &&
-                             User.IsInRole("JobSeeker"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="JobSeeker"
-                                   asp-action="Index">
+                                <a class="workat-nav-link" asp-controller="JobSeeker" asp-action="Index">
                                     Dashboard
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Application"
-                                   asp-action="MyApplications">
+                                <a class="workat-nav-link" asp-controller="Jobs" asp-action="Index">
+                                    Find Jobs
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="workat-nav-link" asp-controller="Application" asp-action="MyApplications">
                                     My Applications
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="workat-nav-link" asp-controller="Resume" asp-action="Index">
+                                    Resume
+                                </a>
+                            </li>
+
+
                         }
 
-                        <!-- Company Dashboard, My Jobs, and Applications -->
-                        @if (SignInManager.IsSignedIn(User) &&
-                             User.IsInRole("Company"))
+                        <!-- Company Navigation -->
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Company"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Company"
-                                   asp-action="Index">
-                                    Company Dashboard
+                                <a class="workat-nav-link" asp-controller="Company" asp-action="Index">
+                                    Dashboard
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Job"
-                                   asp-action="Index">
-                                    My Jobs
+                                <a class="workat-nav-link" asp-controller="Job" asp-action="Index">
+                                    Jobs
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-dark"
-                                   asp-controller="Application"
-                                   asp-action="CompanyApplications">
-                                    Job Applications
+                                <a class="workat-nav-link" asp-controller="Application" asp-action="CompanyApplications">
+                                    Applications
                                 </a>
                             </li>
                         }
 
                     </ul>
 
-                    <!-- Login / Register / Logout -->
+                    <!-- Authentication Navigation -->
                     <partial name="_LoginPartial" />
-
                 </div>
-
             </div>
-
         </nav>
     </header>
 
-    <div class="container">
-
-        <main role="main" class="pb-3">
+    <div class="container flex-grow-1">
+        <main role="main" class="py-4">
             @RenderBody()
         </main>
-
     </div>
 
-    <footer class="border-top footer text-muted">
-
+    <footer class="workat-footer">
         <div class="container">
-            &copy; 2026 - WorkAt -
-
-            <a asp-area=""
-               asp-controller="Home"
-               asp-action="Privacy">
-                Privacy
-            </a>
+            <div class="workat-footer-inner">
+                <div>
+                    &copy; 2026 WorkAt. All rights reserved.
+                </div>
+            </div>
         </div>
-
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="~/js/site.js"
-            asp-append-version="true">
-    </script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
 </body>
 </html>

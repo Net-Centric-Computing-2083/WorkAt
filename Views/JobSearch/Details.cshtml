@@ -1,15 +1,14 @@
 @model WorkAt.Models.Job
 
 @{
-    ViewData["Title"] = "Job Details";
+    ViewData["Title"] = Model.Title;
 }
 
-<div class="container py-5">
-
+<div class="py-2" style="max-width: 800px; margin: 0 auto;">
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            @TempData["SuccessMessage"]
+            <span>@TempData["SuccessMessage"]</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -17,153 +16,124 @@
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-            @TempData["ErrorMessage"]
+            <span>@TempData["ErrorMessage"]</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <div class="mb-4">
-        <a asp-controller="JobSearch"
-           asp-action="Index"
-           class="btn btn-outline-secondary">
-            ← Back to Jobs
+    <div class="mb-3">
+        <a asp-controller="Jobs" asp-action="Index" class="text-secondary small fw-medium">
+            &larr; Back to all jobs
         </a>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-body p-4 p-md-5">
-
-            <div class="mb-4">
-                <h1 class="mb-2">@Model.Title</h1>
-
-                @if (Model.Company != null)
-                {
-                    <h5 class="text-muted">
-                        @Model.Company.CompanyName
-                    </h5>
-                }
+    <div class="card p-4 p-md-5 mb-4">
+        <!-- Header -->
+        <div class="mb-4 pb-3 border-bottom">
+            <h1 class="h2 mb-2">@Model.Title</h1>
+            <div class="h5 fw-normal text-secondary mb-3">
+                @(Model.Company?.CompanyName ?? "Confidential Employer")
             </div>
 
-            <div class="row g-4 mb-4">
-
+            <div class="d-flex flex-wrap gap-2">
                 @if (!string.IsNullOrWhiteSpace(Model.Location))
                 {
-                    <div class="col-md-6">
-                        <strong>Location</strong>
-                        <p class="text-muted mb-0">
-                            @Model.Location
-                        </p>
-                    </div>
+                    <span class="job-meta-tag">@Model.Location</span>
                 }
-
                 @if (!string.IsNullOrWhiteSpace(Model.EmploymentType))
                 {
-                    <div class="col-md-6">
-                        <strong>Employment Type</strong>
-                        <p class="text-muted mb-0">
-                            @Model.EmploymentType
-                        </p>
-                    </div>
+                    <span class="job-meta-tag">@Model.EmploymentType</span>
                 }
-
                 @if (!string.IsNullOrWhiteSpace(Model.Salary))
                 {
-                    <div class="col-md-6">
-                        <strong>Salary</strong>
-                        <p class="text-muted mb-0">
-                            @Model.Salary
-                        </p>
-                    </div>
+                    <span class="job-meta-tag">@Model.Salary</span>
                 }
-
-                <div class="col-md-6">
-                    <strong>Posted Date</strong>
-                    <p class="text-muted mb-0">
-                        @Model.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")
-                    </p>
-                </div>
-
+                <span class="job-meta-tag">Posted @Model.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")</span>
                 @if (Model.Deadline.HasValue)
                 {
-                    <div class="col-md-6">
-                        <strong>Application Deadline</strong>
-                        <p class="text-muted mb-0">
-                            @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")
-                        </p>
+                    <span class="job-meta-tag text-muted">Deadline: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                }
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+            <h2 class="h5 mb-3">About the Role</h2>
+            <div class="text-secondary" style="white-space: pre-line; line-height: 1.7;">
+                @Model.Description
+            </div>
+        </div>
+
+        <!-- Requirements -->
+        @if (!string.IsNullOrWhiteSpace(Model.Requirements))
+        {
+            <div class="mb-4">
+                <h2 class="h5 mb-3">Requirements &amp; Qualifications</h2>
+                <div class="text-secondary" style="white-space: pre-line; line-height: 1.7;">
+                    @Model.Requirements
+                </div>
+            </div>
+        }
+
+        <!-- About Company -->
+        @if (Model.Company != null && !string.IsNullOrWhiteSpace(Model.Company.Description))
+        {
+            <div class="mb-4 pt-3 border-top">
+                <h2 class="h5 mb-2">About @Model.Company.CompanyName</h2>
+                <div class="text-secondary small" style="white-space: pre-line;">
+                    @Model.Company.Description
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.Company.Website))
+                {
+                    <div class="mt-2">
+                        <a href="@Model.Company.Website" target="_blank" rel="noopener noreferrer" class="small text-decoration-underline text-dark">
+                            Visit website &rarr;
+                        </a>
                     </div>
                 }
-
             </div>
+        }
 
-            <hr />
-
-            <div class="my-4">
-                <h3>Job Description</h3>
-
-                <p class="mt-3">
-                    @Model.Description
-                </p>
-            </div>
-
-            @if (!string.IsNullOrWhiteSpace(Model.Requirements))
+        <!-- Apply CTA Section -->
+        <div class="pt-4 border-top">
+            @if (User.IsInRole("JobSeeker"))
             {
-                <div class="my-4">
-                    <h3>Requirements</h3>
-
-                    <p class="mt-3">
-                        @Model.Requirements
-                    </p>
-                </div>
+                if (ViewBag.HasApplied == true)
+                {
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge @(ViewBag.ApplicationStatus == "Accepted" ? "badge-accepted" : ViewBag.ApplicationStatus == "Rejected" ? "badge-rejected" : "badge-pending") py-2 px-3">
+                            Status: @ViewBag.ApplicationStatus
+                        </span>
+                        <span class="text-muted small">You have already submitted an application for this position.</span>
+                    </div>
+                }
+                else
+                {
+                    <form asp-controller="Application" asp-action="Apply" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="jobId" value="@Model.JobId" />
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Apply for this Position
+                        </button>
+                    </form>
+                }
             }
-
-            @if (Model.Company != null)
+            else if (!User.Identity?.IsAuthenticated ?? true)
             {
-                <hr />
-
-                <div class="my-4">
-                    <h3>About the Company</h3>
-
-                    <p class="mt-3">
-                        @Model.Company.CompanyName
-                    </p>
-                </div>
+                <a asp-controller="Account"
+                   asp-action="Login"
+                   asp-route-returnUrl="@Url.Action("Details", "JobSearch", new { id = Model.JobId })"
+                   class="btn btn-primary btn-lg">
+                    Sign in to Apply
+                </a>
+                <span class="text-muted small ms-2">or <a asp-controller="Account" asp-action="Register" asp-route-role="JobSeeker" class="text-dark fw-semibold">create an account</a></span>
             }
-
-            <div class="mt-4">
-                @if (User.IsInRole("JobSeeker"))
-                {
-                    if (ViewBag.HasApplied == true)
-                    {
-                        <div class="alert alert-success d-inline-block mb-0">
-                            <strong>Application Status:</strong> @ViewBag.ApplicationStatus (You have applied for this job)
-                        </div>
-                    }
-                    else
-                    {
-                        <form asp-controller="Application"
-                              asp-action="Create"
-                              method="post"
-                              class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="jobId" value="@Model.JobId" />
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                Apply Now
-                            </button>
-                        </form>
-                    }
-                }
-                else if (!User.Identity?.IsAuthenticated ?? true)
-                {
-                    <a asp-area="Identity"
-                       asp-page="/Account/Login"
-                       asp-route-returnUrl="@Url.Action("Details", "JobSearch", new { id = Model.JobId })"
-                       class="btn btn-primary btn-lg">
-                        Apply Now
-                    </a>
-                }
-            </div>
-
+            else if (User.IsInRole("Company"))
+            {
+                <span class="badge badge-neutral py-2 px-3">
+                    Viewing listing in company mode
+                </span>
+            }
         </div>
     </div>
-
 </div>

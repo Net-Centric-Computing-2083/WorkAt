@@ -1,220 +1,181 @@
 @model WorkAt.Models.JobSeeker
 
 @{
-    ViewData["Title"] = "JobSeeker Dashboard";
+    ViewData["Title"] = "Job Seeker Dashboard";
 }
 
-<div class="container mt-4">
-
-    @* Success message after updating profile *@
+<div class="py-2">
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-            </button>
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <div class="mb-4">
-        <h2>JobSeeker Dashboard</h2>
-        <p class="text-muted">
-            Welcome, @Model.FirstName @Model.LastName!
-        </p>
-    </div>
-
-    <!-- Profile -->
-    <div class="card mb-4">
-
-        <div class="card-header">
-            <h4 class="mb-0">My Profile</h4>
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+        <div>
+            <h1 class="h2 mb-1">@Model.FirstName @Model.LastName</h1>
+            <p class="text-muted mb-0">Candidate Profile &amp; Application Status</p>
         </div>
-
-        <div class="card-body">
-
-            <p>
-                <strong>Name:</strong>
-                @Model.FirstName @Model.LastName
-            </p>
-
-            <p>
-                <strong>Phone:</strong>
-                @(string.IsNullOrWhiteSpace(Model.Phone)
-                    ? "Not provided"
-                    : Model.Phone)
-            </p>
-
-            <p class="mb-3">
-                <strong>Address:</strong>
-                @(string.IsNullOrWhiteSpace(Model.Address)
-                    ? "Not provided"
-                    : Model.Address)
-            </p>
-
-            <a asp-controller="JobSeeker"
-               asp-action="EditProfile"
-               class="btn btn-primary">
+        <div class="d-flex gap-2">
+            <a asp-action="EditProfile" class="btn btn-secondary">
                 Edit Profile
             </a>
-
+            <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary">
+                Find Jobs
+            </a>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-
-        <!-- Resume -->
-        <div class="col-md-6 mb-3">
+    <div class="row g-4 mb-4">
+        <!-- Personal Info -->
+        <div class="col-lg-6">
             <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Personal Information</span>
+                    <a asp-action="EditProfile" class="btn btn-sm btn-outline-secondary">Edit</a>
+                </div>
                 <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="text-muted small mb-1">Full Name</div>
+                            <div class="fw-semibold text-dark">@Model.FirstName @Model.LastName</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-muted small mb-1">Email Address</div>
+                            <div class="fw-semibold text-dark">@(Model.User?.Email ?? "N/A")</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-muted small mb-1">Phone Number</div>
+                            <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.Phone) ? "Not provided" : Model.Phone)</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="text-muted small mb-1">Address</div>
+                            <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.Address) ? "Not provided" : Model.Address)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <h5>My Resume</h5>
-
+        <!-- Resume Status -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Resume Status</span>
+                    @if (Model.Resume != null)
+                    {
+                        <a asp-controller="Resume" asp-action="Edit" class="btn btn-sm btn-outline-secondary">Edit Resume</a>
+                    }
+                </div>
+                <div class="card-body d-flex flex-column justify-content-between">
                     @if (Model.Resume == null)
                     {
-                        <p class="text-muted">
-                            You have not created your resume yet.
-                        </p>
-
-                        <a asp-controller="Resume"
-                           asp-action="Create"
-                           class="btn btn-primary">
-                            Create Resume
-                        </a>
+                        <div>
+                            <h3 class="h6 text-muted mb-2">No Resume Created</h3>
+                            <p class="text-secondary small mb-3">
+                                Creating a resume allows employers to view your background, education, and technical skills when reviewing your applications.
+                            </p>
+                        </div>
+                        <div>
+                            <a asp-controller="Resume" asp-action="Create" class="btn btn-sm btn-primary">
+                                Create Resume Now
+                            </a>
+                        </div>
                     }
                     else
                     {
-                        <p>
-                            Your resume is available.
-                        </p>
-
-                        <a asp-controller="Resume"
-                           asp-action="Index"
-                           class="btn btn-primary">
-                            View My Resume
-                        </a>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge badge-accepted">Resume Active</span>
+                                <span class="text-muted small">@Model.Resume.ResumeSkills.Count skills listed</span>
+                            </div>
+                            <p class="text-secondary small mb-3 text-truncate-2">
+                                @(string.IsNullOrWhiteSpace(Model.Resume.Summary) ? "No summary added yet." : Model.Resume.Summary)
+                            </p>
+                        </div>
+                        <div>
+                            <a asp-controller="Resume" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                View Full Resume &rarr;
+                            </a>
+                        </div>
                     }
-
                 </div>
             </div>
         </div>
-
-        <!-- Find Jobs -->
-        <div class="col-md-6 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-
-                    <h5>Find Jobs</h5>
-
-                    <p class="text-muted">
-                        Search for available job opportunities.
-                    </p>
-
-                    <a asp-controller="Jobs"
-                       asp-action="Index"
-                       class="btn btn-success">
-                        Browse Jobs
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- Applications -->
+    <!-- Recent Applications -->
     <div class="card">
-
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">My Applications</h4>
-            <a asp-controller="Application" asp-action="MyApplications" class="btn btn-sm btn-outline-primary">
-                View All Applications
+            <span>My Applications</span>
+            <a asp-controller="Application" asp-action="MyApplications" class="btn btn-sm btn-outline-secondary">
+                View All
             </a>
         </div>
-
-        <div class="card-body">
-
-            @if (Model.Applications != null &&
-                 Model.Applications.Any())
+        <div class="card-body p-0">
+            @if (Model.Applications != null && Model.Applications.Any())
             {
                 <div class="table-responsive">
-
-                    <table class="table table-striped align-middle">
-
+                    <table class="table">
                         <thead>
                             <tr>
-                                <th>Job</th>
+                                <th>Role</th>
                                 <th>Company</th>
                                 <th>Applied Date</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th class="text-end">Action</th>
                             </tr>
                         </thead>
-
                         <tbody>
-
-                            @foreach (var application in Model.Applications)
+                            @foreach (var app in Model.Applications.OrderByDescending(a => a.AppliedDate).Take(5))
                             {
                                 <tr>
-                                    <td>
-                                        <strong>@(application.Job?.Title ?? "Unknown")</strong>
+                                    <td class="fw-semibold">
+                                        @(app.Job?.Title ?? "Unknown Position")
                                     </td>
-
-                                    <td>
-                                        @(application.Job?.Company?.CompanyName ?? "Unknown")
+                                    <td class="text-secondary">
+                                        @(app.Job?.Company?.CompanyName ?? "Unknown Company")
                                     </td>
-
-                                    <td>
-                                        @application.AppliedDate
-                                        .ToLocalTime()
-                                        .ToString("yyyy-MM-dd")
+                                    <td class="text-muted small">
+                                        @app.AppliedDate.ToLocalTime().ToString("MMM dd, yyyy")
                                     </td>
-
                                     <td>
-                                        @if (application.Status == "Accepted")
+                                        @if (app.Status == "Accepted")
                                         {
-                                            <span class="badge bg-success">Accepted</span>
+                                            <span class="badge badge-accepted">Accepted</span>
                                         }
-                                        else if (application.Status == "Rejected")
+                                        else if (app.Status == "Rejected")
                                         {
-                                            <span class="badge bg-danger">Rejected</span>
+                                            <span class="badge badge-rejected">Rejected</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            <span class="badge badge-pending">Pending</span>
                                         }
                                     </td>
-
-                                    <td>
-                                        <a asp-controller="Application"
-                                           asp-action="Details"
-                                           asp-route-id="@application.ApplicationId"
-                                           class="btn btn-sm btn-outline-primary">
+                                    <td class="text-end">
+                                        <a asp-controller="Application" asp-action="Details" asp-route-id="@app.ApplicationId" class="btn btn-sm btn-outline-secondary">
                                             Details
                                         </a>
                                     </td>
                                 </tr>
                             }
-
                         </tbody>
-
                     </table>
-
                 </div>
             }
             else
             {
-                <p class="text-muted mb-0">
-                    You have not applied for any jobs yet.
-                </p>
+                <div class="p-4 text-center text-muted">
+                    <p class="mb-3">You haven't submitted any job applications yet.</p>
+                    <a asp-controller="Jobs" asp-action="Index" class="btn btn-sm btn-primary">
+                        Browse Open Jobs
+                    </a>
+                </div>
             }
-
         </div>
-
     </div>
-
 </div>

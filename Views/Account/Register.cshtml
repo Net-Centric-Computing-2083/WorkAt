@@ -1,110 +1,143 @@
-﻿@model WorkAt.Models.RegisterViewModel
+@model WorkAt.Models.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Register";
+    ViewData["Title"] = "Create Account";
+    var defaultRole = string.IsNullOrEmpty(Model.AccountType) ? "JobSeeker" : Model.AccountType;
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2 class="mb-4">Create your WorkAt account</h2>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create your account</h2>
+            <p>Join WorkAt to discover opportunities or hire talent</p>
+        </div>
 
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger"></div>
+        <form asp-action="Register" method="post" id="registerForm" novalidate>
+            @Html.AntiForgeryToken()
 
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors mb-3"></div>
+
+            <!-- Role Selector -->
+            <input type="hidden" asp-for="AccountType" id="accountTypeInput" value="@defaultRole" />
+
+            <div class="segmented-control" role="group" aria-label="Account Type">
+                <div class="segmented-control-item">
+                    <button type="button" 
+                            id="btnRoleJobSeeker" 
+                            class="segmented-control-btn @(defaultRole == "JobSeeker" ? "active" : "")"
+                            onclick="selectRole('JobSeeker')">
+                        Job Seeker
+                    </button>
+                </div>
+                <div class="segmented-control-item">
+                    <button type="button" 
+                            id="btnRoleCompany" 
+                            class="segmented-control-btn @(defaultRole == "Company" ? "active" : "")"
+                            onclick="selectRole('Company')">
+                        Company
+                    </button>
+                </div>
+            </div>
+            <span asp-validation-for="AccountType" class="text-danger mb-3"></span>
+
+            <!-- Company-specific Fields -->
+            <div id="companySection" style="display: @(defaultRole == "Company" ? "block" : "none");">
+                <div class="mb-3">
+                    <label asp-for="CompanyName" class="form-label">
+                        Company Name <span class="input-required">*</span>
+                    </label>
+                    <input asp-for="CompanyName" class="form-control" placeholder="WorkAt Inc." />
+                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Website" class="form-label">
+                        Website <span class="text-muted fw-normal">(optional)</span>
+                    </label>
+                    <input asp-for="Website" class="form-control" placeholder="https://example.com" />
+                    <span asp-validation-for="Website" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">
+                        About the Company <span class="text-muted fw-normal">(optional)</span>
+                    </label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Brief description of what your company does..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Job Seeker-specific Fields -->
+            <div id="jobSeekerSection" style="display: @(defaultRole == "JobSeeker" ? "block" : "none");">
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="FirstName" class="form-label">
+                            First Name <span class="input-required">*</span>
+                        </label>
+                        <input asp-for="FirstName" class="form-control" placeholder="Ram" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="LastName" class="form-label">
+                            Last Name <span class="input-required">*</span>
+                        </label>
+                        <input asp-for="LastName" class="form-control" placeholder="Nepal" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shared Fields: Email & Phone -->
             <div class="mb-3">
-                <label asp-for="AccountType" class="form-label">
-                    Account Type
+                <label asp-for="Email" class="form-label">
+                    Email Address <span class="input-required">*</span>
                 </label>
-
-                <select asp-for="AccountType"
-                        class="form-select"
-                        id="accountType">
-
-                    <option value="">-- Select account type --</option>
-                    <option value="Company">Company</option>
-                    <option value="JobSeeker">Job Seeker</option>
-                </select>
-
-                <span asp-validation-for="AccountType"
-                      class="text-danger"></span>
-            </div>
-
-            <div class="mb-3" id="companyFields">
-                <label asp-for="CompanyName"
-                       class="form-label"></label>
-
-                <input asp-for="CompanyName"
-                       class="form-control" />
-
-                <span asp-validation-for="CompanyName"
-                      class="text-danger"></span>
-            </div>
-
-            <div id="jobSeekerFields">
-
-                <div class="mb-3">
-                    <label asp-for="FirstName"
-                           class="form-label"></label>
-
-                    <input asp-for="FirstName"
-                           class="form-control" />
-
-                    <span asp-validation-for="FirstName"
-                          class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="LastName"
-                           class="form-label"></label>
-
-                    <input asp-for="LastName"
-                           class="form-control" />
-
-                    <span asp-validation-for="LastName"
-                          class="text-danger"></span>
-                </div>
-
+                <input asp-for="Email" type="email" class="form-control" placeholder="name@example.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Email"
-                       class="form-label"></label>
-
-                <input asp-for="Email"
-                       class="form-control" />
-
-                <span asp-validation-for="Email"
-                      class="text-danger"></span>
+                <label asp-for="Phone" class="form-label">
+                    Phone Number <span class="input-required">*</span>
+                </label>
+                <input asp-for="Phone" type="tel" class="form-control" placeholder="+977 98XXXXXXXX" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Password"
-                       class="form-label"></label>
-
-                <input asp-for="Password"
-                       class="form-control" />
-
-                <span asp-validation-for="Password"
-                      class="text-danger"></span>
+                <label asp-for="Address" class="form-label">
+                    Address <span class="text-muted fw-normal">(optional)</span>
+                </label>
+                <input asp-for="Address" class="form-control" placeholder="City, Country" />
+                <span asp-validation-for="Address" class="text-danger"></span>
             </div>
 
+            <!-- Password Fields -->
             <div class="mb-3">
-                <label asp-for="ConfirmPassword"
-                       class="form-label"></label>
-
-                <input asp-for="ConfirmPassword"
-                       class="form-control" />
-
-                <span asp-validation-for="ConfirmPassword"
-                      class="text-danger"></span>
+                <label asp-for="Password" class="form-label">
+                    Password <span class="input-required">*</span>
+                </label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="At least 6 characters" />
+                <span asp-validation-for="Password" class="text-danger"></span>
             </div>
 
-            <button type="submit"
-                    class="btn btn-primary">
-                Register
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label">
+                    Confirm Password <span class="input-required">*</span>
+                </label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Repeat your password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2">
+                Create Account
             </button>
         </form>
+
+        <div class="text-center mt-4 pt-3 border-top">
+            <span class="text-muted small">Already have an account?</span>
+            <a asp-action="Login" class="small fw-semibold ms-1 text-dark">Sign in</a>
+        </div>
     </div>
 </div>
 
@@ -112,34 +145,25 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        function updateAccountFields() {
-            const accountType =
-                document.getElementById("accountType").value;
+        function selectRole(role) {
+            document.getElementById("accountTypeInput").value = role;
 
-            const companyFields =
-                document.getElementById("companyFields");
+            const btnJobSeeker = document.getElementById("btnRoleJobSeeker");
+            const btnCompany = document.getElementById("btnRoleCompany");
+            const companySec = document.getElementById("companySection");
+            const jobSeekerSec = document.getElementById("jobSeekerSection");
 
-            const jobSeekerFields =
-                document.getElementById("jobSeekerFields");
-
-            if (accountType === "Company") {
-                companyFields.style.display = "block";
-                jobSeekerFields.style.display = "none";
-            }
-            else if (accountType === "JobSeeker") {
-                companyFields.style.display = "none";
-                jobSeekerFields.style.display = "block";
-            }
-            else {
-                companyFields.style.display = "none";
-                jobSeekerFields.style.display = "none";
+            if (role === "Company") {
+                btnCompany.classList.add("active");
+                btnJobSeeker.classList.remove("active");
+                companySec.style.display = "block";
+                jobSeekerSec.style.display = "none";
+            } else {
+                btnJobSeeker.classList.add("active");
+                btnCompany.classList.remove("active");
+                companySec.style.display = "none";
+                jobSeekerSec.style.display = "block";
             }
         }
-
-        document
-            .getElementById("accountType")
-            .addEventListener("change", updateAccountFields);
-
-        updateAccountFields();
     </script>
 }

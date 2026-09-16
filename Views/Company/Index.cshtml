@@ -2,109 +2,106 @@
 
 @{
     ViewData["Title"] = "Company Dashboard";
+    var totalJobs = Model.Jobs?.Count ?? 0;
+    var totalApplications = Model.Jobs?.SelectMany(j => j.Applications)?.Count() ?? 0;
 }
 
-<div class="container py-4">
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">Company Dashboard</h2>
-            <p class="text-muted mb-0">Manage your company profile</p>
+<div class="py-2">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <a asp-action="Edit" class="btn btn-primary px-4">
-            <i class="bi bi-pencil-square me-1"></i> Edit Profile
-        </a>
+    }
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+        <div>
+            <h1 class="h2 mb-1">@Model.CompanyName</h1>
+            <p class="text-muted mb-0">Company Profile &amp; Recruitment Overview</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" class="btn btn-secondary">
+                Edit Profile
+            </a>
+            <a asp-controller="Job" asp-action="Create" class="btn btn-primary">
+                Post a Job
+            </a>
+        </div>
     </div>
 
-    <div class="row g-4">
-
-        <!-- Profile Card -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4">
-
-                    <div class="d-flex align-items-center mb-4">
-                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3"
-                             style="width:64px; height:64px; font-size:1.5rem; font-weight:600;">
-                            @(Model.CompanyName?.Length > 0 ? Model.CompanyName.Substring(0, 1).ToUpper() : "C")
-                        </div>
-                        <div>
-                            <h4 class="mb-0 fw-semibold">@Model.CompanyName</h4>
-                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 mt-1">Active</span>
-                        </div>
-                    </div>
-
-                    <hr class="my-4" />
-
-                    <div class="row g-4">
-                        <div class="col-12">
-                            <small class="text-uppercase text-muted fw-semibold" style="font-size:0.75rem;">About</small>
-                            <p class="mb-0 mt-1">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description added yet." : Model.Description)</p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <small class="text-uppercase text-muted fw-semibold" style="font-size:0.75rem;">Address</small>
-                            <p class="mb-0 mt-1">
-                                <i class="bi bi-geo-alt me-1"></i>
-                                @(string.IsNullOrWhiteSpace(Model.Address) ? "—" : Model.Address)
-                            </p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <small class="text-uppercase text-muted fw-semibold" style="font-size:0.75rem;">Phone</small>
-                            <p class="mb-0 mt-1">
-                                <i class="bi bi-telephone me-1"></i>
-                                @(string.IsNullOrWhiteSpace(Model.Phone) ? "—" : Model.Phone)
-                            </p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <small class="text-uppercase text-muted fw-semibold" style="font-size:0.75rem;">Website</small>
-                            <p class="mb-0 mt-1">
-                                <i class="bi bi-globe me-1"></i>
-                                @if (!string.IsNullOrWhiteSpace(Model.Website))
-                                {
-                                    <a href="@Model.Website" target="_blank" rel="noopener">@Model.Website</a>
-                                }
-                                else
-                                {
-                                    <span>—</span>
-                                }
-                            </p>
-                        </div>
-                    </div>
-
-                </div>
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card p-3">
+                <span class="text-muted small fw-semibold text-uppercase">Active Listings</span>
+                <div class="h3 fw-bold my-1 text-dark">@totalJobs</div>
+                <a asp-controller="Job" asp-action="Index" class="small text-secondary">Manage jobs &rarr;</a>
             </div>
         </div>
 
-        <!-- Side Panel -->
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-body p-4">
-                    <h6 class="fw-semibold mb-3">Quick Actions</h6>
-                    <a asp-action="Edit" class="btn btn-outline-primary w-100 mb-2">
-                        <i class="bi bi-pencil me-1"></i> Edit Profile
-                    </a>
-                    <a asp-controller="Job" asp-action="Index" class="btn btn-outline-secondary w-100 mb-2">
-                        <i class="bi bi-briefcase me-1"></i> View My Jobs
-                    </a>
-                    <a asp-controller="Application" asp-action="CompanyApplications" class="btn btn-outline-success w-100">
-                        <i class="bi bi-person-lines-fill me-1"></i> Job Applications
-                    </a>
-                </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card p-3">
+                <span class="text-muted small fw-semibold text-uppercase">Total Applications</span>
+                <div class="h3 fw-bold my-1 text-dark">@totalApplications</div>
+                <a asp-controller="Application" asp-action="CompanyApplications" class="small text-secondary">Review applicants &rarr;</a>
             </div>
+        </div>
+    </div>
 
-            <div class="card shadow-sm border-0 rounded-4 bg-primary bg-opacity-10">
-                <div class="card-body p-4">
-                    <h6 class="fw-semibold mb-1 text-primary">Profile Tip</h6>
-                    <p class="mb-0 small text-muted">
-                        A complete profile with a clear description and website helps job seekers trust your listings.
-                    </p>
+    <!-- Profile Details Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Company Information</span>
+            <a asp-action="Edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="text-muted small mb-1">Company Name</div>
+                    <div class="fw-semibold text-dark">@Model.CompanyName</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small mb-1">Account Email</div>
+                    <div class="fw-semibold text-dark">@(Model.User?.Email ?? "N/A")</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small mb-1">Phone Number</div>
+                    <div class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(Model.Phone) ? "Not provided" : Model.Phone)</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="text-muted small mb-1">Website</div>
+                    <div>
+                        @if (!string.IsNullOrWhiteSpace(Model.Website))
+                        {
+                            <a href="@Model.Website" target="_blank" rel="noopener noreferrer" class="text-decoration-underline text-dark">
+                                @Model.Website
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not provided</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small mb-1">Office Address</div>
+                    <div class="text-dark">@(string.IsNullOrWhiteSpace(Model.Address) ? "Not provided" : Model.Address)</div>
+                </div>
+
+                <div class="col-12">
+                    <div class="text-muted small mb-1">About Company</div>
+                    <div class="text-secondary" style="white-space: pre-line;">
+                        @(string.IsNullOrWhiteSpace(Model.Description) ? "No description provided yet." : Model.Description)
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>

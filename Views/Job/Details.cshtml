@@ -1,84 +1,65 @@
-﻿@model WorkAt.Models.Job
+@model WorkAt.Models.Job
 
 @{
-    ViewData["Title"] = "Job Details";
+    ViewData["Title"] = Model.Title;
 }
 
-<h1>Job Details</h1>
+<div class="py-2" style="max-width: 800px; margin: 0 auto;">
+    <div class="mb-3">
+        <a asp-action="Index" class="text-secondary small fw-medium">
+            &larr; Back to My Jobs
+        </a>
+    </div>
 
-<hr />
+    <div class="card p-4 p-md-5 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+            <div>
+                <h1 class="h2 mb-1">@Model.Title</h1>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    @if (!string.IsNullOrWhiteSpace(Model.Location))
+                    {
+                        <span class="job-meta-tag">@Model.Location</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.EmploymentType))
+                    {
+                        <span class="job-meta-tag">@Model.EmploymentType</span>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.Salary))
+                    {
+                        <span class="job-meta-tag">@Model.Salary</span>
+                    }
+                    <span class="job-meta-tag">Posted @Model.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                    @if (Model.Deadline.HasValue)
+                    {
+                        <span class="job-meta-tag text-muted">Deadline: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                    }
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.JobId" class="btn btn-secondary">
+                    Edit Job
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.JobId" class="btn btn-danger">
+                    Delete
+                </a>
+            </div>
+        </div>
 
-<div>
-    <dl class="row">
+        <div class="mb-4">
+            <h2 class="h5 mb-3">Job Description</h2>
+            <div class="text-secondary" style="white-space: pre-line; line-height: 1.7;">
+                @Model.Description
+            </div>
+        </div>
 
-        <dt class="col-sm-3">
-            Title
-        </dt>
-        <dd class="col-sm-9">
-            @Model.Title
-        </dd>
-
-        <dt class="col-sm-3">
-            Description
-        </dt>
-        <dd class="col-sm-9">
-            @Model.Description
-        </dd>
-
-        <dt class="col-sm-3">
-            Requirements
-        </dt>
-        <dd class="col-sm-9">
-            @Model.Requirements
-        </dd>
-
-        <dt class="col-sm-3">
-            Location
-        </dt>
-        <dd class="col-sm-9">
-            @Model.Location
-        </dd>
-
-        <dt class="col-sm-3">
-            Salary
-        </dt>
-        <dd class="col-sm-9">
-            @Model.Salary
-        </dd>
-
-        <dt class="col-sm-3">
-            Employment Type
-        </dt>
-        <dd class="col-sm-9">
-            @Model.EmploymentType
-        </dd>
-
-        <dt class="col-sm-3">
-            Posted Date
-        </dt>
-        <dd class="col-sm-9">
-            @Model.PostedDate
-        </dd>
-
-        <dt class="col-sm-3">
-            Deadline
-        </dt>
-        <dd class="col-sm-9">
-            @(Model.Deadline?.ToShortDateString() ?? "No deadline")
-        </dd>
-
-    </dl>
-</div>
-
-<div>
-    <a asp-action="Edit"
-       asp-route-id="@Model.JobId"
-       class="btn btn-warning">
-        Edit
-    </a>
-
-    <a asp-action="Index"
-       class="btn btn-secondary">
-        Back to My Jobs
-    </a>
+        @if (!string.IsNullOrWhiteSpace(Model.Requirements))
+        {
+            <div class="mb-4">
+                <h2 class="h5 mb-3">Requirements</h2>
+                <div class="text-secondary" style="white-space: pre-line; line-height: 1.7;">
+                    @Model.Requirements
+                </div>
+            </div>
+        }
+    </div>
 </div>

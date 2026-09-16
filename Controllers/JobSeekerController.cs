@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 using WorkAt.Data;
 using WorkAt.Models;
 
@@ -33,7 +34,10 @@ namespace WorkAt.Controllers
             }
 
             var jobSeeker = await _context.JobSeekers
+                .Include(js => js.User)
                 .Include(js => js.Resume)
+                    .ThenInclude(r => r!.ResumeSkills)
+                        .ThenInclude(rs => rs.Skill)
                 .Include(js => js.Applications)
                     .ThenInclude(a => a.Job)
                         .ThenInclude(j => j!.Company)
@@ -59,6 +63,7 @@ namespace WorkAt.Controllers
             }
 
             var jobSeeker = await _context.JobSeekers
+                .Include(js => js.User)
                 .FirstOrDefaultAsync(js => js.UserId == userId);
 
             if (jobSeeker == null)
@@ -81,12 +86,11 @@ namespace WorkAt.Controllers
                 return Unauthorized();
             }
 
-            // UserId is not submitted from the edit form,
-            // so remove its validation error.
+            // UserId is not submitted from the edit form
             ModelState.Remove(nameof(JobSeeker.UserId));
 
-            // Find the actual JobSeeker belonging to the logged-in user
             var jobSeeker = await _context.JobSeekers
+                .Include(js => js.User)
                 .FirstOrDefaultAsync(js => js.UserId == userId);
 
             if (jobSeeker == null)
@@ -94,21 +98,62 @@ namespace WorkAt.Controllers
                 return NotFound();
             }
 
+            // Validate phone format & uniqueness if changed
+            if (!string.IsNullOrWhiteSpace(model.Phone))
+            {
+                string digitsOnly = Regex.Replace(model.Phone, @"\D", "");
+                if (digitsOnly.Length < 7 || digitsOnly.Length > 15)
+                {
+                    ModelState.AddModelError("Phone", "Please enter a valid phone number with 7 to 15 digits.");
+                }
+                else
+                {
+                    string cleanPhone = Regex.Replace(model.Phone, @"[\s\-\(\)\+]", "");
+                    bool phoneInOtherJobSeeker = await _context.JobSeekers
+                        .AnyAsync(js => js.JobSeekerId != jobSeeker.JobSeekerId && js.Phone != null &&
+                            js.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "") == cleanPhone);
+
+                    bool phoneInCompany = await _context.Companies
+                        .AnyAsync(c => c.Phone != null &&
+                            c.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "") == cleanPhone);
+
+                    if (phoneInOtherJobSeeker || phoneInCompany)
+                    {
+                        ModelState.AddModelError("Phone", "This phone number is already registered.");
+                    }
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            // Update only the fields the user is allowed to edit
-            jobSeeker.FirstName = model.FirstName;
-            jobSeeker.LastName = model.LastName;
-            jobSeeker.Phone = model.Phone;
-            jobSeeker.Address = model.Address;
+            // Update allowed fields
+            jobSeeker.FirstName = model.FirstName.Trim();
+            jobSeeker.LastName = model.LastName.Trim();
+            jobSeeker.Phone = model.Phone?.Trim();
+            jobSeeker.Address = model.Address?.Trim();
 
-            await _context.SaveChangesAsync();
+            // Synchronize Identity user PhoneNumber
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                user.PhoneNumber = jobSeeker.Phone;
+                await _userManager.UpdateAsync(user);
+            }
 
-            TempData["SuccessMessage"] =
-                "Your profile has been updated successfully.";
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError(string.Empty, "This phone number is already in use by another account.");
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Your profile has been updated successfully.";
 
             return RedirectToAction(nameof(Index));
         }

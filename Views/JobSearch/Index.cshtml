@@ -1,132 +1,105 @@
-﻿@model IEnumerable<WorkAt.Models.Job>
+@model IEnumerable<WorkAt.Models.Job>
 
 @{
-    ViewData["Title"] = "Find Jobs";
+    ViewData["Title"] = "Search Jobs";
 }
 
-<div class="container py-5">
-    <div class="mb-4">
-        <h1>Find Jobs</h1>
-        <p>Search for jobs that match your skills and interests.</p>
+<div class="py-2">
+    <!-- Header -->
+    <div class="mb-4 pb-2 border-bottom">
+        <h1 class="h2 mb-1">Search Opportunities</h1>
+        <p class="text-muted mb-0">Browse open positions from verified companies on WorkAt.</p>
     </div>
 
-    <form asp-controller="JobSearch" asp-action="Index" method="get" class="mb-5">
-        <div class="row g-3">
-            <div class="col-md-5">
-                <label for="keyword" class="form-label">Keyword</label>
-                <input type="text"
-                       id="keyword"
-                       name="keyword"
-                       class="form-control"
-                       placeholder="Job title or keyword"
-                       value="@ViewBag.Keyword" />
+    <!-- Search Bar -->
+    <div class="card p-3 mb-4">
+        <form asp-controller="JobSearch" asp-action="Index" method="get">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label for="keyword" class="form-label">Keyword or Title</label>
+                    <input type="text"
+                           id="keyword"
+                           name="keyword"
+                           class="form-control"
+                           placeholder="e.g. Software Engineer, Designer"
+                           value="@ViewBag.Keyword" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text"
+                           id="location"
+                           name="location"
+                           class="form-control"
+                           placeholder="e.g. Remote, New York"
+                           value="@ViewBag.Location" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="employmentType" class="form-label">Employment Type</label>
+                    <select id="employmentType" name="employmentType" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="Full Time" selected="@(ViewBag.EmploymentType == "Full Time")">Full Time</option>
+                        <option value="Part Time" selected="@(ViewBag.EmploymentType == "Part Time")">Part Time</option>
+                        <option value="Contract" selected="@(ViewBag.EmploymentType == "Contract")">Contract</option>
+                        <option value="Internship" selected="@(ViewBag.EmploymentType == "Internship")">Internship</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Search
+                    </button>
+                    @if (!string.IsNullOrEmpty(ViewBag.Keyword as string) || !string.IsNullOrEmpty(ViewBag.Location as string) || !string.IsNullOrEmpty(ViewBag.EmploymentType as string))
+                    {
+                        <a asp-action="Index" class="btn btn-secondary" title="Clear Filters">
+                            Clear
+                        </a>
+                    }
+                </div>
             </div>
+        </form>
+    </div>
 
-            <div class="col-md-3">
-                <label for="location" class="form-label">Location</label>
-                <input type="text"
-                       id="location"
-                       name="location"
-                       class="form-control"
-                       placeholder="e.g. Kathmandu"
-                       value="@ViewBag.Location" />
-            </div>
-
-            <div class="col-md-3">
-                <label for="employmentType" class="form-label">Employment Type</label>
-                <select id="employmentType"
-                        name="employmentType"
-                        class="form-select">
-
-                    <option value="">All Types</option>
-
-                    <option value="Full Time"
-                            selected="@(ViewBag.EmploymentType == "Full Time")">
-                        Full Time
-                    </option>
-
-                    <option value="Part Time"
-                            selected="@(ViewBag.EmploymentType == "Part Time")">
-                        Part Time
-                    </option>
-
-                    <option value="Internship"
-                            selected="@(ViewBag.EmploymentType == "Internship")">
-                        Internship
-                    </option>
-
-                    <option value="Contract"
-                            selected="@(ViewBag.EmploymentType == "Contract")">
-                        Contract
-                    </option>
-                </select>
-            </div>
-
-            <div class="col-md-1 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100">
-                    Search
-                </button>
-            </div>
-        </div>
-    </form>
-
+    <!-- Jobs Grid -->
     @if (Model != null && Model.Any())
     {
-        <div class="mb-3">
-            <h2>Available Jobs</h2>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted small">Showing @Model.Count() open role@(Model.Count() == 1 ? "" : "s")</span>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-3">
             @foreach (var job in Model)
             {
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body d-flex flex-column">
+                    <div class="job-card">
+                        <div class="job-card-title">@job.Title</div>
+                        <div class="job-card-company">@(job.Company?.CompanyName ?? "Confidential")</div>
 
-                            <h3 class="card-title">@job.Title</h3>
-
-                            @if (job.Company != null)
-                            {
-                                <p class="text-muted mb-2">
-                                    @job.Company.CompanyName
-                                </p>
-                            }
-
+                        <div class="job-card-meta">
                             @if (!string.IsNullOrWhiteSpace(job.Location))
                             {
-                                <p class="mb-2">
-                                    <strong>Location:</strong>
-                                    @job.Location
-                                </p>
+                                <span class="job-meta-tag">@job.Location</span>
                             }
-
                             @if (!string.IsNullOrWhiteSpace(job.EmploymentType))
                             {
-                                <p class="mb-2">
-                                    <strong>Type:</strong>
-                                    @job.EmploymentType
-                                </p>
+                                <span class="job-meta-tag">@job.EmploymentType</span>
                             }
-
                             @if (!string.IsNullOrWhiteSpace(job.Salary))
                             {
-                                <p class="mb-2">
-                                    <strong>Salary:</strong>
-                                    @job.Salary
-                                </p>
+                                <span class="job-meta-tag">@job.Salary</span>
                             }
+                        </div>
 
-                            <p class="text-muted mt-auto">
-                                Posted @job.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")
-                            </p>
-
-                            <a asp-controller="JobSearch"
-                               asp-action="Details"
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">
+                                @job.PostedDate.ToLocalTime().ToString("MMM dd")
+                            </span>
+                            <a asp-action="Details"
                                asp-route-id="@job.JobId"
-                               class="btn btn-outline-primary">
-                                View Details
+                               class="btn btn-sm btn-outline-primary">
+                                View Details &rarr;
                             </a>
-
                         </div>
                     </div>
                 </div>
@@ -135,18 +108,12 @@
     }
     else
     {
-        <div class="text-center py-5">
-            <h3>No jobs found</h3>
-            <p class="text-muted">
-                We couldn't find any jobs matching your search.
-                Try changing your keyword or filters.
-            </p>
-
-            <a asp-controller="JobSearch"
-               asp-action="Index"
-               class="btn btn-outline-secondary">
-                Clear Filters
-            </a>
+        <div class="card p-5 text-center">
+            <h3 class="h5 text-dark mb-2">No matching jobs found</h3>
+            <p class="text-muted small mb-3">Try adjusting your keywords, location, or employment type filters.</p>
+            <div>
+                <a asp-action="Index" class="btn btn-sm btn-secondary">Reset Filters</a>
+            </div>
         </div>
     }
 </div>

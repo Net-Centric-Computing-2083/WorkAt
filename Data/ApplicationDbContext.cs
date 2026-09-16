@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WorkAt.Models;
 
@@ -81,6 +81,23 @@ namespace WorkAt.Data
                 .WithMany(s => s.ResumeSkills)
                 .HasForeignKey(rs => rs.SkillId)
                 .OnDelete(DeleteBehavior.Cascade);
+            // Unique Phone on Companies where Phone is not null
+            builder.Entity<Company>()
+                .HasIndex(c => c.Phone)
+                .IsUnique()
+                .HasFilter("[Phone] IS NOT NULL");
+
+            // Unique Phone on JobSeekers where Phone is not null
+            builder.Entity<JobSeeker>()
+                .HasIndex(js => js.Phone)
+                .IsUnique()
+                .HasFilter("[Phone] IS NOT NULL");
+
+            // Unique PhoneNumber on ApplicationUser where PhoneNumber is not null
+            builder.Entity<ApplicationUser>()
+                .HasIndex(u => u.PhoneNumber)
+                .IsUnique()
+                .HasFilter("[PhoneNumber] IS NOT NULL");
         }
     }
 }
