@@ -166,6 +166,7 @@ namespace WorkAt.Controllers
                     .ThenInclude(js => js!.User)
                 .Include(a => a.JobSeeker)
                     .ThenInclude(js => js!.Resume)
+                .Include(a => a.Feedback)
                 .Where(a => a.Job != null &&
                             a.Job.CompanyId == company.CompanyId)
                 .OrderByDescending(a => a.AppliedDate)
@@ -203,6 +204,13 @@ namespace WorkAt.Controllers
                 var application = await _context.Applications
                     .Include(a => a.Job)
                         .ThenInclude(j => j!.Company)
+                    .Include(a => a.JobSeeker)
+                        .ThenInclude(js => js!.User)
+                    .Include(a => a.JobSeeker)
+                        .ThenInclude(js => js!.Resume)
+                            .ThenInclude(r => r!.ResumeSkills)
+                                .ThenInclude(rs => rs.Skill)
+                    .Include(a => a.Feedback)
                     .FirstOrDefaultAsync(a => a.ApplicationId == id &&
                                               a.JobSeekerId == jobSeeker.JobSeekerId);
 
@@ -226,12 +234,14 @@ namespace WorkAt.Controllers
                 // Strict ownership check: Application's Job must belong to this Company
                 var application = await _context.Applications
                     .Include(a => a.Job)
+                        .ThenInclude(j => j!.Company)
                     .Include(a => a.JobSeeker)
                         .ThenInclude(js => js!.User)
                     .Include(a => a.JobSeeker)
                         .ThenInclude(js => js!.Resume)
                             .ThenInclude(r => r!.ResumeSkills)
                                 .ThenInclude(rs => rs.Skill)
+                    .Include(a => a.Feedback)
                     .FirstOrDefaultAsync(a => a.ApplicationId == id &&
                                               a.Job != null &&
                                               a.Job.CompanyId == company.CompanyId);
@@ -254,20 +264,16 @@ namespace WorkAt.Controllers
         [Authorize(Roles = "Company")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Accept(int id)
+        public async Task<IActionResult> Accept(int id, string? feedbackText)
         {
             var application = await GetCompanyOwnedApplication(id);
 
             if (application == null)
                 return NotFound();
 
-            if (application.Status != "Pending")
-            {
-                TempData["ErrorMessage"] = "This application has already been processed.";
-                return RedirectToAction(nameof(CompanyApplications));
-            }
-
             application.Status = "Accepted";
+
+            await SaveOrUpdateFeedbackAsync(id, feedbackText);
 
             await _context.SaveChangesAsync();
 
@@ -282,25 +288,60 @@ namespace WorkAt.Controllers
         [Authorize(Roles = "Company")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Reject(int id)
+        public async Task<IActionResult> Reject(int id, string? feedbackText)
         {
             var application = await GetCompanyOwnedApplication(id);
 
             if (application == null)
                 return NotFound();
 
-            if (application.Status != "Pending")
+            // Rejection requires feedback text
+            if (string.IsNullOrWhiteSpace(feedbackText))
             {
-                TempData["ErrorMessage"] = "This application has already been processed.";
-                return RedirectToAction(nameof(CompanyApplications));
+                TempData["ErrorMessage"] = "Feedback is required when rejecting an application.";
+                return RedirectToAction(nameof(Details), new { id = id });
             }
 
             application.Status = "Rejected";
+
+            await SaveOrUpdateFeedbackAsync(id, feedbackText);
 
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Application has been rejected.";
             return RedirectToAction(nameof(CompanyApplications));
+        }
+
+        // =========================================================
+        // HELPER: SAVE OR UPDATE FEEDBACK
+        // =========================================================
+
+        private async Task SaveOrUpdateFeedbackAsync(int applicationId, string? feedbackText)
+        {
+            if (string.IsNullOrWhiteSpace(feedbackText))
+            {
+                return;
+            }
+
+            var existingFeedback = await _context.ApplicationFeedbacks
+                .FirstOrDefaultAsync(f => f.ApplicationId == applicationId);
+
+            if (existingFeedback != null)
+            {
+                existingFeedback.FeedbackText = feedbackText;
+                existingFeedback.FeedbackDate = DateTime.UtcNow;
+            }
+            else
+            {
+                var feedback = new ApplicationFeedback
+                {
+                    ApplicationId = applicationId,
+                    FeedbackText = feedbackText,
+                    FeedbackDate = DateTime.UtcNow
+                };
+
+                _context.ApplicationFeedbacks.Add(feedback);
+            }
         }
 
         // =========================================================

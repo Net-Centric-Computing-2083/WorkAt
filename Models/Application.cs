@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace WorkAt.Models
 {
@@ -21,5 +21,8 @@ namespace WorkAt.Models
         public int JobSeekerId { get; set; }
 
         public JobSeeker? JobSeeker { get; set; }
+
+        // Optional company feedback for this application
+        public ApplicationFeedback? Feedback { get; set; }
     }
 }

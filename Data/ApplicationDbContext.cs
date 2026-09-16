@@ -19,10 +19,25 @@ namespace WorkAt.Data
         public DbSet<Resume> Resumes { get; set; }
         public DbSet<Skill> Skills { get; set; }
         public DbSet<ResumeSkill> ResumeSkills { get; set; }
+        public DbSet<ApplicationFeedback> ApplicationFeedbacks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // Application -> ApplicationFeedback (1:0..1)
+            builder.Entity<ApplicationFeedback>()
+                .HasKey(af => af.FeedbackId);
+
+            builder.Entity<ApplicationFeedback>()
+                .HasOne(af => af.Application)
+                .WithOne(a => a.Feedback)
+                .HasForeignKey<ApplicationFeedback>(af => af.ApplicationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ApplicationFeedback>()
+                .HasIndex(af => af.ApplicationId)
+                .IsUnique();
 
             // ApplicationUser -> Company (1:1)
             builder.Entity<Company>()
