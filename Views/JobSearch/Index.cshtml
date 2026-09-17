@@ -1,7 +1,9 @@
-@model IEnumerable<WorkAt.Models.Job>
+@model WorkAt.Models.BrowseJobsViewModel
 
 @{
     ViewData["Title"] = "Search Jobs";
+    var startItem = Model.TotalItems == 0 ? 0 : (Model.PageIndex - 1) * Model.PageSize + 1;
+    var endItem = Math.Min(Model.PageIndex * Model.PageSize, Model.TotalItems);
 }
 
 <div class="py-2">
@@ -21,8 +23,8 @@
                            id="keyword"
                            name="keyword"
                            class="form-control"
-                           placeholder="e.g. Software Engineer, Designer"
-                           value="@ViewBag.Keyword" />
+                           placeholder="e.g. AI Engineer, Designer"
+                           value="@Model.Keyword" />
                 </div>
 
                 <div class="col-md-3">
@@ -31,18 +33,18 @@
                            id="location"
                            name="location"
                            class="form-control"
-                           placeholder="e.g. Remote, New York"
-                           value="@ViewBag.Location" />
+                           placeholder="e.g. Remote, Kathmandu"
+                           value="@Model.Location" />
                 </div>
 
                 <div class="col-md-3">
                     <label for="employmentType" class="form-label">Employment Type</label>
                     <select id="employmentType" name="employmentType" class="form-select">
                         <option value="">All Types</option>
-                        <option value="Full Time" selected="@(ViewBag.EmploymentType == "Full Time")">Full Time</option>
-                        <option value="Part Time" selected="@(ViewBag.EmploymentType == "Part Time")">Part Time</option>
-                        <option value="Contract" selected="@(ViewBag.EmploymentType == "Contract")">Contract</option>
-                        <option value="Internship" selected="@(ViewBag.EmploymentType == "Internship")">Internship</option>
+                        <option value="Full Time" selected="@(Model.EmploymentType == "Full Time")">Full Time</option>
+                        <option value="Part Time" selected="@(Model.EmploymentType == "Part Time")">Part Time</option>
+                        <option value="Contract" selected="@(Model.EmploymentType == "Contract")">Contract</option>
+                        <option value="Internship" selected="@(Model.EmploymentType == "Internship")">Internship</option>
                     </select>
                 </div>
 
@@ -50,7 +52,7 @@
                     <button type="submit" class="btn btn-primary w-100">
                         Search
                     </button>
-                    @if (!string.IsNullOrEmpty(ViewBag.Keyword as string) || !string.IsNullOrEmpty(ViewBag.Location as string) || !string.IsNullOrEmpty(ViewBag.EmploymentType as string))
+                    @if (!string.IsNullOrEmpty(Model.Keyword) || !string.IsNullOrEmpty(Model.Location) || !string.IsNullOrEmpty(Model.EmploymentType))
                     {
                         <a asp-action="Index" class="btn btn-secondary" title="Clear Filters">
                             Clear
@@ -62,14 +64,14 @@
     </div>
 
     <!-- Jobs Grid -->
-    @if (Model != null && Model.Any())
+    @if (Model.Jobs != null && Model.Jobs.Any())
     {
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="text-muted small">Showing @Model.Count() open role@(Model.Count() == 1 ? "" : "s")</span>
+            <span class="text-muted small">Showing @startItem to @endItem of @Model.TotalItems open role@(Model.TotalItems == 1 ? "" : "s")</span>
         </div>
 
-        <div class="row g-3">
-            @foreach (var job in Model)
+        <div class="row g-3 mb-4">
+            @foreach (var job in Model.Jobs)
             {
                 <div class="col-md-6 col-lg-4">
                     <div class="job-card">
@@ -105,6 +107,42 @@
                 </div>
             }
         </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Search Jobs Pagination">
+                    <ul class="pagination">
+                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-keyword="@Model.Keyword"
+                               asp-route-location="@Model.Location"
+                               asp-route-employmentType="@Model.EmploymentType"
+                               asp-route-page="@(Model.PageIndex - 1)">&laquo; Prev</a>
+                        </li>
+
+                        @for (int p = 1; p <= Model.TotalPages; p++)
+                        {
+                            <li class="page-item @(p == Model.PageIndex ? "active" : "")">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-keyword="@Model.Keyword"
+                                   asp-route-location="@Model.Location"
+                                   asp-route-employmentType="@Model.EmploymentType"
+                                   asp-route-page="@p">@p</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-keyword="@Model.Keyword"
+                               asp-route-location="@Model.Location"
+                               asp-route-employmentType="@Model.EmploymentType"
+                               asp-route-page="@(Model.PageIndex + 1)">Next &raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
     }
     else
     {

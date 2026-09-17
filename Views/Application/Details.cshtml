@@ -47,22 +47,22 @@
     </div>
 
     <!-- Status Banner -->
-    <div class="card mb-4 border-0 shadow-sm bg-light">
+    <div class="card mb-4">
         <div class="card-body d-flex flex-column flex-sm-row justify-content-between align-items-sm-center p-3 gap-2">
             <div>
                 <span class="text-muted small">Application Status:</span>
-                <span class="ms-2 fw-semibold fs-5">
+                <span class="ms-2">
                     @if (Model.Status == "Accepted")
                     {
-                        <span class="badge bg-success">Accepted</span>
+                        <span class="badge badge-accepted">Accepted</span>
                     }
                     else if (Model.Status == "Rejected")
                     {
-                        <span class="badge bg-danger">Rejected</span>
+                        <span class="badge badge-rejected">Rejected</span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark">Pending Review</span>
+                        <span class="badge badge-pending">Pending Review</span>
                     }
                 </span>
             </div>
@@ -76,7 +76,7 @@
 
         <!-- Job Details Card -->
         <div class="col-lg-6">
-            <div class="card h-100 shadow-sm border-0">
+            <div class="card h-100">
                 <div class="card-header bg-white border-bottom py-3">
                     <h5 class="mb-0 fw-bold">Position Details</h5>
                 </div>
@@ -124,7 +124,7 @@
 
         <!-- Applicant & Resume Card -->
         <div class="col-lg-6">
-            <div class="card h-100 shadow-sm border-0">
+            <div class="card h-100">
                 <div class="card-header bg-white border-bottom py-3">
                     <h5 class="mb-0 fw-bold">Applicant Resume & Info</h5>
                 </div>
@@ -180,7 +180,7 @@
                                     <div>
                                         @foreach (var rs in Model.JobSeeker.Resume.ResumeSkills)
                                         {
-                                            <span class="badge bg-secondary me-1 mb-1">@rs.Skill?.Name</span>
+                                            <span class="badge badge-neutral me-1 mb-1">@rs.Skill?.Name</span>
                                         }
                                     </div>
                                 </div>
@@ -188,7 +188,7 @@
                         }
                         else
                         {
-                            <div class="alert alert-light border text-muted small mb-0">
+                            <div class="alert alert-info text-muted small mb-0">
                                 Candidate has not created a resume profile.
                             </div>
                         }
@@ -204,14 +204,14 @@
     </div>
 
     <!-- Company Feedback Section -->
-    <div class="card shadow-sm border-0 mb-4">
+    <div class="card mb-4">
         <div class="card-header bg-white border-bottom py-3">
             <h5 class="mb-0 fw-bold">Company Feedback</h5>
         </div>
         <div class="card-body">
             @if (Model.Feedback != null && !string.IsNullOrWhiteSpace(Model.Feedback.FeedbackText))
             {
-                <div class="p-3 bg-light rounded border">
+                <div class="p-3 bg-subtle rounded border">
                     <p class="text-dark mb-2" style="white-space: pre-line;">@Model.Feedback.FeedbackText</p>
                     <span class="text-muted small d-block">
                         Provided on @Model.Feedback.FeedbackDate.ToLocalTime().ToString("MMM dd, yyyy - hh:mm tt")
@@ -220,18 +220,18 @@
             }
             else
             {
-                <div class="alert alert-light border text-muted mb-0">
+                <div class="alert alert-info mb-0">
                     No feedback has been provided yet.
                 </div>
             }
         </div>
     </div>
 
-    <!-- Company Processing Panel -->
+    <!-- Company Decision & Feedback Control Panel -->
     @if (isCompany)
     {
-        <div class="card shadow-sm border-primary">
-            <div class="card-header bg-primary text-white py-3">
+        <div class="card mb-4">
+            <div class="card-header bg-white border-bottom py-3">
                 <h5 class="mb-0 fw-bold">Application Decision & Feedback</h5>
             </div>
             <div class="card-body">
@@ -247,7 +247,7 @@
                             <input type="hidden" name="id" value="@Model.ApplicationId" />
 
                             <div class="mb-3">
-                                <label for="acceptFeedback" class="form-label fw-semibold text-dark">Acceptance Message / Interview Details (Optional)</label>
+                                <label for="acceptFeedback" class="form-label">Acceptance Message / Interview Details (Optional)</label>
                                 <textarea id="acceptFeedback" name="feedbackText" class="form-control" rows="3" placeholder="e.g. Congratulations! We would like to invite you for an interview on Monday at 10:00 AM.">@(Model.Feedback?.FeedbackText)</textarea>
                             </div>
 
@@ -263,7 +263,7 @@
                             <input type="hidden" name="id" value="@Model.ApplicationId" />
 
                             <div class="mb-3">
-                                <label for="rejectFeedback" class="form-label fw-semibold text-dark">Rejection Reason / Feedback (Required)</label>
+                                <label for="rejectFeedback" class="form-label">Rejection Reason / Feedback (Required)</label>
                                 <textarea id="rejectFeedback" name="feedbackText" class="form-control" rows="3" placeholder="e.g. Thank you for applying. Unfortunately, we have decided to move forward with another candidate whose qualifications more closely match our current needs.">@(Model.Feedback?.FeedbackText)</textarea>
                             </div>
 

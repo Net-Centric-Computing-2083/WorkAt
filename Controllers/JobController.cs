@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +22,7 @@ namespace WorkAt.Controllers
         }
 
         // GET: Job
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, string? employmentType, string? sortOrder, int page = 1)
         {
             var userId = _userManager.GetUserId(User);
 
@@ -34,12 +34,67 @@ namespace WorkAt.Controllers
                 return NotFound("Company profile not found.");
             }
 
-            var jobs = await _context.Jobs
+            var query = _context.Jobs
                 .Where(j => j.CompanyId == company.CompanyId)
-                .OrderByDescending(j => j.PostedDate)
+                .AsQueryable();
+
+            // Search filter: partial keywords across Title, Location, Description
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var terms = search.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var term in terms)
+                {
+                    var tempTerm = term;
+                    query = query.Where(j =>
+                        EF.Functions.Like(j.Title, $"%{tempTerm}%") ||
+                        (j.Location != null && EF.Functions.Like(j.Location, $"%{tempTerm}%")) ||
+                        EF.Functions.Like(j.Description, $"%{tempTerm}%"));
+                }
+            }
+
+            // Employment Type filter
+            if (!string.IsNullOrWhiteSpace(employmentType))
+            {
+                query = query.Where(j => j.EmploymentType == employmentType);
+            }
+
+            // Sorting
+            sortOrder = string.Equals(sortOrder, "asc", StringComparison.OrdinalIgnoreCase) ? "asc" : "desc";
+            if (sortOrder == "asc")
+            {
+                query = query.OrderBy(j => j.PostedDate);
+            }
+            else
+            {
+                query = query.OrderByDescending(j => j.PostedDate);
+            }
+
+            // Pagination
+            int pageSize = 10;
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return View(jobs);
+            var viewModel = new CompanyJobsViewModel
+            {
+                Jobs = items,
+                PageIndex = page,
+                TotalPages = totalPages,
+                TotalItems = totalItems,
+                PageSize = pageSize,
+                Search = search,
+                EmploymentType = employmentType,
+                SortOrder = sortOrder
+            };
+
+            return View(viewModel);
         }
 
         // GET: Job/Details/5

@@ -106,7 +106,7 @@ namespace WorkAt.Controllers
 
         [Authorize(Roles = "JobSeeker")]
         [HttpGet]
-        public async Task<IActionResult> MyApplications()
+        public async Task<IActionResult> MyApplications(string? search, string? status, string? sortOrder, int page = 1)
         {
             var userId = _userManager.GetUserId(User);
 
@@ -124,15 +124,68 @@ namespace WorkAt.Controllers
                 return NotFound("JobSeeker profile not found.");
             }
 
-            // Only retrieve applications belonging to this JobSeeker
-            var applications = await _context.Applications
+            var query = _context.Applications
                 .Include(a => a.Job)
                     .ThenInclude(j => j!.Company)
                 .Where(a => a.JobSeekerId == jobSeeker.JobSeekerId)
-                .OrderByDescending(a => a.AppliedDate)
+                .AsQueryable();
+
+            // Search filter: job title or company name
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var terms = search.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var term in terms)
+                {
+                    var tempTerm = term;
+                    query = query.Where(a =>
+                        (a.Job != null && a.Job.Title != null && EF.Functions.Like(a.Job.Title, $"%{tempTerm}%")) ||
+                        (a.Job != null && a.Job.Company != null && a.Job.Company.CompanyName != null && EF.Functions.Like(a.Job.Company.CompanyName, $"%{tempTerm}%")));
+                }
+            }
+
+            // Status filter
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(a => a.Status == status);
+            }
+
+            // Sorting
+            sortOrder = string.Equals(sortOrder, "asc", StringComparison.OrdinalIgnoreCase) ? "asc" : "desc";
+            if (sortOrder == "asc")
+            {
+                query = query.OrderBy(a => a.AppliedDate);
+            }
+            else
+            {
+                query = query.OrderByDescending(a => a.AppliedDate);
+            }
+
+            // Pagination
+            int pageSize = 10;
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return View(applications);
+            var viewModel = new MyApplicationsViewModel
+            {
+                Applications = items,
+                PageIndex = page,
+                TotalPages = totalPages,
+                TotalItems = totalItems,
+                PageSize = pageSize,
+                Search = search,
+                Status = status,
+                SortOrder = sortOrder
+            };
+
+            return View(viewModel);
         }
 
         // =========================================================
@@ -141,7 +194,7 @@ namespace WorkAt.Controllers
 
         [Authorize(Roles = "Company")]
         [HttpGet]
-        public async Task<IActionResult> CompanyApplications()
+        public async Task<IActionResult> CompanyApplications(string? search, string? status, string? sortOrder, int page = 1)
         {
             var userId = _userManager.GetUserId(User);
 
@@ -159,20 +212,76 @@ namespace WorkAt.Controllers
                 return NotFound("Company profile not found.");
             }
 
-            // Only retrieve applications for jobs owned by this company
-            var applications = await _context.Applications
+            var query = _context.Applications
                 .Include(a => a.Job)
                 .Include(a => a.JobSeeker)
                     .ThenInclude(js => js!.User)
                 .Include(a => a.JobSeeker)
                     .ThenInclude(js => js!.Resume)
                 .Include(a => a.Feedback)
-                .Where(a => a.Job != null &&
-                            a.Job.CompanyId == company.CompanyId)
-                .OrderByDescending(a => a.AppliedDate)
+                .Where(a => a.Job != null && a.Job.CompanyId == company.CompanyId)
+                .AsQueryable();
+
+            // Search filter: applicant name or job title
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var terms = search.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var term in terms)
+                {
+                    var tempTerm = term;
+                    query = query.Where(a =>
+                        (a.JobSeeker != null && (
+                            EF.Functions.Like(a.JobSeeker.FirstName, $"%{tempTerm}%") ||
+                            EF.Functions.Like(a.JobSeeker.LastName, $"%{tempTerm}%") ||
+                            EF.Functions.Like(a.JobSeeker.FirstName + " " + a.JobSeeker.LastName, $"%{tempTerm}%")
+                        )) ||
+                        (a.Job != null && EF.Functions.Like(a.Job.Title, $"%{tempTerm}%")));
+                }
+            }
+
+            // Status filter
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(a => a.Status == status);
+            }
+
+            // Sorting
+            sortOrder = string.Equals(sortOrder, "asc", StringComparison.OrdinalIgnoreCase) ? "asc" : "desc";
+            if (sortOrder == "asc")
+            {
+                query = query.OrderBy(a => a.AppliedDate);
+            }
+            else
+            {
+                query = query.OrderByDescending(a => a.AppliedDate);
+            }
+
+            // Pagination
+            int pageSize = 10;
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return View(applications);
+            var viewModel = new CompanyApplicationsViewModel
+            {
+                Applications = items,
+                PageIndex = page,
+                TotalPages = totalPages,
+                TotalItems = totalItems,
+                PageSize = pageSize,
+                Search = search,
+                Status = status,
+                SortOrder = sortOrder
+            };
+
+            return View(viewModel);
         }
 
         // =========================================================

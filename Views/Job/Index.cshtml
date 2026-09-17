@@ -1,7 +1,9 @@
-@model IEnumerable<WorkAt.Models.Job>
+@model WorkAt.Models.CompanyJobsViewModel
 
 @{
     ViewData["Title"] = "Manage Jobs";
+    var startItem = Model.TotalItems == 0 ? 0 : (Model.PageIndex - 1) * Model.PageSize + 1;
+    var endItem = Math.Min(Model.PageIndex * Model.PageSize, Model.TotalItems);
 }
 
 <div class="py-2">
@@ -17,11 +19,59 @@
         </div>
     </div>
 
-    @if (!Model.Any())
+    <!-- Search & Filter Bar -->
+    <div class="card p-3 mb-4">
+        <form asp-action="Index" method="get">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search Jobs</label>
+                    <input type="text"
+                           id="search"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search by job title or keyword..."
+                           value="@Model.Search" />
+                </div>
+
+                <div class="col-md-3">
+                    <label for="employmentType" class="form-label">Employment Type</label>
+                    <select id="employmentType" name="employmentType" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="Full Time" selected="@(Model.EmploymentType == "Full Time")">Full Time</option>
+                        <option value="Part Time" selected="@(Model.EmploymentType == "Part Time")">Part Time</option>
+                        <option value="Contract" selected="@(Model.EmploymentType == "Contract")">Contract</option>
+                        <option value="Internship" selected="@(Model.EmploymentType == "Internship")">Internship</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="sortOrder" class="form-label">Sort By Date</label>
+                    <select id="sortOrder" name="sortOrder" class="form-select">
+                        <option value="desc" selected="@(Model.SortOrder == "desc")">Newest First (Descending)</option>
+                        <option value="asc" selected="@(Model.SortOrder == "asc")">Oldest First (Ascending)</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Apply
+                    </button>
+                    @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.EmploymentType) || Model.SortOrder == "asc")
+                    {
+                        <a asp-action="Index" class="btn btn-secondary" title="Clear Filters">
+                            Clear
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+    </div>
+
+    @if (!Model.Jobs.Any())
     {
         <div class="card p-5 text-center">
-            <h3 class="h5 text-dark mb-2">No jobs posted yet</h3>
-            <p class="text-muted small mb-3">Create your first job listing to start receiving candidate applications.</p>
+            <h3 class="h5 text-dark mb-2">No jobs found</h3>
+            <p class="text-muted small mb-3">No posted job listings match your current search or filter criteria.</p>
             <div>
                 <a asp-action="Create" class="btn btn-primary">Post a Job</a>
             </div>
@@ -34,6 +84,7 @@
                 <table class="table">
                     <thead>
                         <tr>
+                            <th class="text-center" style="width: 60px;">No.</th>
                             <th>Job Title</th>
                             <th>Location</th>
                             <th>Type</th>
@@ -44,44 +95,91 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var job in Model)
-                        {
-                            <tr>
-                                <td class="fw-semibold text-dark">
-                                    @job.Title
-                                </td>
-                                <td class="text-secondary">
-                                    @(string.IsNullOrWhiteSpace(job.Location) ? "—" : job.Location)
-                                </td>
-                                <td>
-                                    <span class="job-meta-tag">@(job.EmploymentType ?? "Full Time")</span>
-                                </td>
-                                <td class="text-secondary small">
-                                    @(string.IsNullOrWhiteSpace(job.Salary) ? "—" : job.Salary)
-                                </td>
-                                <td class="text-muted small">
-                                    @job.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")
-                                </td>
-                                <td class="text-muted small">
-                                    @(job.Deadline?.ToLocalTime().ToString("MMM dd, yyyy") ?? "Open")
-                                </td>
-                                <td class="text-end">
-                                    <div class="d-inline-flex gap-1">
-                                        <a asp-action="Details" asp-route-id="@job.JobId" class="btn btn-sm btn-outline-secondary">
-                                            View
-                                        </a>
-                                        <a asp-action="Edit" asp-route-id="@job.JobId" class="btn btn-sm btn-outline-secondary">
-                                            Edit
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@job.JobId" class="btn btn-sm btn-outline-danger">
-                                            Delete
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
+                        @{
+                            var jobList = Model.Jobs.ToList();
+                            for (int i = 0; i < jobList.Count; i++)
+                            {
+                                var job = jobList[i];
+                                int displayNo = (Model.PageIndex - 1) * Model.PageSize + i + 1;
+                                <tr>
+                                    <td class="text-center text-muted small fw-medium">@displayNo</td>
+                                    <td class="fw-semibold text-dark">
+                                        @job.Title
+                                    </td>
+                                    <td class="text-secondary">
+                                        @(string.IsNullOrWhiteSpace(job.Location) ? "—" : job.Location)
+                                    </td>
+                                    <td>
+                                        <span class="job-meta-tag">@(job.EmploymentType ?? "Full Time")</span>
+                                    </td>
+                                    <td class="text-secondary small">
+                                        @(string.IsNullOrWhiteSpace(job.Salary) ? "—" : job.Salary)
+                                    </td>
+                                    <td class="text-muted small">
+                                        @job.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td class="text-muted small">
+                                        @(job.Deadline?.ToLocalTime().ToString("MMM dd, yyyy") ?? "Open")
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <a asp-action="Details" asp-route-id="@job.JobId" class="btn btn-sm btn-outline-secondary">
+                                                View
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@job.JobId" class="btn btn-sm btn-outline-secondary">
+                                                Edit
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@job.JobId" class="btn btn-sm btn-outline-danger">
+                                                Delete
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Pagination Footer -->
+            <div class="card-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                <span class="text-muted small">
+                    Showing @startItem to @endItem of @Model.TotalItems job listing@(Model.TotalItems == 1 ? "" : "s")
+                </span>
+
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Jobs List Pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-employmentType="@Model.EmploymentType"
+                                   asp-route-sortOrder="@Model.SortOrder"
+                                   asp-route-page="@(Model.PageIndex - 1)">&laquo; Prev</a>
+                            </li>
+
+                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            {
+                                <li class="page-item @(p == Model.PageIndex ? "active" : "")">
+                                    <a class="page-link" asp-action="Index"
+                                       asp-route-search="@Model.Search"
+                                       asp-route-employmentType="@Model.EmploymentType"
+                                       asp-route-sortOrder="@Model.SortOrder"
+                                       asp-route-page="@p">@p</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-search="@Model.Search"
+                                   asp-route-employmentType="@Model.EmploymentType"
+                                   asp-route-sortOrder="@Model.SortOrder"
+                                   asp-route-page="@(Model.PageIndex + 1)">Next &raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             </div>
         </div>
     }
