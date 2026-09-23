@@ -1,54 +1,66 @@
 # WorkAt
 
-A web-based job portal system for connecting companies with job seekers through online job posting, searching, and application management.
+A web-based job portal system that connects companies with job seekers through online job posting, job searching, and application management.
 
 ## Technology Stack
 
-### Backend
-
 * ASP.NET Core MVC
-* Entity Framework Core (EF Core)
-
-### Database
-
+* C#
 * Entity Framework Core
+* ASP.NET Core Identity
+* SQL Server Express LocalDB
+* Bootstrap
+* jQuery
 
-## Modules
+## Main Modules
 
-* Company Registration
-* Job Posting
-* Job Seeker Registration
-* Job Search
+* User Registration and Authentication
+* Company Management
+* Job Seeker Management
+* Job Posting and Management
+* Job Search and Filtering
+* Resume and Skill Management
 * Job Application
-* Application Status
-* Resume Information
+* Application Status and Feedback
+* Administrator Management
 
-## Database Tables
+## Main Features
 
-* Companies
-* JobSeekers
-* Jobs
-* Applications
-* Skills
-* Resumes
+* Role-based access for Admin, Company, and JobSeeker
+* Company and Job Seeker verification
+* Job posting and CRUD operations
+* Job search and filtering
+* Resume and skill management
+* Online job application
+* Application status tracking
+* Company feedback on applications
+* Authorized resume viewing and downloading
+* Administrator management of users and applications
 
-## Features
+## Database
 
-* Company CRUD
-* Job Posting
-* Job Search
-* Job Application
-* Application Status
-* Search and Filter
-* Login and Role-based Access
+WorkAt uses SQL Server Express LocalDB with Entity Framework Core Code First.
+
+Main application entities include:
+
+* Admin
+* Company
+* JobSeeker
+* Job
+* Application
+* ApplicationFeedback
+* Resume
+* Skill
+* ResumeSkill
 
 ## Project Structure
 
 ```text
-JobPortal/
+WorkAt/
 ├── Controllers/
 ├── Models/
 ├── Views/
 ├── Data/
+├── Migrations/
 └── wwwroot/
 ```
