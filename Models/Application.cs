@@ -24,5 +24,12 @@ namespace WorkAt.Models
 
         // Optional company feedback for this application
         public ApplicationFeedback? Feedback { get; set; }
+
+        // PDF Resume Attachment
+        [StringLength(500)]
+        public string? ResumePath { get; set; }
+
+        [StringLength(250)]
+        public string? ResumeFileName { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WorkAt.Models
@@ -26,6 +26,12 @@ namespace WorkAt.Models
         public string UserId { get; set; } = string.Empty;
 
         public ApplicationUser? User { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string Status { get; set; } = "Pending";
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // A job seeker can submit many applications
         public ICollection<Application> Applications { get; set; } = new List<Application>();

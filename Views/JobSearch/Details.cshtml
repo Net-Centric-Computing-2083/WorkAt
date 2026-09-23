@@ -51,7 +51,14 @@
                 <span class="job-meta-tag">Posted @Model.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")</span>
                 @if (Model.Deadline.HasValue)
                 {
-                    <span class="job-meta-tag text-muted">Deadline: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                    if (Model.IsDeadlinePassed)
+                    {
+                        <span class="job-meta-tag badge-rejected">Deadline Passed: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                    }
+                    else
+                    {
+                        <span class="job-meta-tag text-muted">Deadline: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                    }
                 }
             </div>
         </div>
@@ -107,33 +114,169 @@
                         <span class="text-muted small">You have already submitted an application for this position.</span>
                     </div>
                 }
+                else if (Model.IsDeadlinePassed)
+                {
+                    <div class="alert alert-warning mb-0" role="alert">
+                        <h3 class="h6 fw-bold mb-1">Applications Closed</h3>
+                        <p class="mb-0 small text-dark">The deadline for this position has passed (@(Model.Deadline?.ToLocalTime().ToString("MMM dd, yyyy"))). New applications are no longer being accepted.</p>
+                    </div>
+                }
+                else if (ViewBag.JobSeekerStatus == "Verified")
+                {
+                    <div class="card p-3 bg-subtle border">
+                        <h3 class="h6 fw-bold mb-2">Apply for this Position</h3>
+                        <p class="text-secondary small mb-3">Your registered contact information and in-app profile will be submitted with this application. You can optionally attach an updated PDF resume.</p>
+                        
+                        <div id="fileClientError" class="alert alert-danger d-none mb-3" role="alert"></div>
+
+                        <form id="applyJobForm" asp-controller="Application" asp-action="Apply" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="jobId" value="@Model.JobId" />
+
+                            <div class="mb-3">
+                                <label for="resumeFile" class="form-label fw-semibold">
+                                    Attach PDF Resume <span class="badge badge-neutral ms-1">PDF Only &bull; Max 5MB</span>
+                                </label>
+                                <input type="file"
+                                       id="resumeFile"
+                                       name="resumeFile"
+                                       class="form-control"
+                                       accept=".pdf,application/pdf" />
+                                <div class="form-text small text-muted">
+                                    <strong>Accepted format:</strong> Standard PDF (.pdf) up to 5 MB. Other file formats (such as Word documents, images, and videos) are not accepted.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitAppBtn">
+                                Submit Application
+                            </button>
+                        </form>
+                    </div>
+                }
                 else
                 {
-                    <form asp-controller="Application" asp-action="Apply" method="post" class="d-inline">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="jobId" value="@Model.JobId" />
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            Apply for this Position
-                        </button>
-                    </form>
+                    <div class="alert alert-info mb-3">
+                        <strong>Account Awaiting Verification:</strong> Your account is awaiting Admin verification. You can apply for jobs after your account has been verified.
+                    </div>
+                    <button type="button" class="btn btn-primary btn-lg opacity-50" disabled>
+                        Apply for this Position (Awaiting Verification)
+                    </button>
                 }
             }
             else if (!User.Identity?.IsAuthenticated ?? true)
             {
-                <a asp-controller="Account"
-                   asp-action="Login"
-                   asp-route-returnUrl="@Url.Action("Details", "JobSearch", new { id = Model.JobId })"
-                   class="btn btn-primary btn-lg">
-                    Sign in to Apply
-                </a>
-                <span class="text-muted small ms-2">or <a asp-controller="Account" asp-action="Register" asp-route-role="JobSeeker" class="text-dark fw-semibold">create an account</a></span>
+                if (Model.IsDeadlinePassed)
+                {
+                    <div class="alert alert-warning mb-0" role="alert">
+                        <h3 class="h6 fw-bold mb-1">Applications Closed</h3>
+                        <p class="mb-0 small text-dark">The deadline for this position has passed. Applications are no longer accepted.</p>
+                    </div>
+                }
+                else
+                {
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       asp-route-returnUrl="@Url.Action("Details", "JobSearch", new { id = Model.JobId })"
+                       class="btn btn-primary btn-lg">
+                        Sign in to Apply
+                    </a>
+                    <span class="text-muted small ms-2">or <a asp-controller="Account" asp-action="Register" asp-route-role="JobSeeker" class="text-dark fw-semibold">create an account</a></span>
+                }
             }
             else if (User.IsInRole("Company"))
             {
-                <span class="badge badge-neutral py-2 px-3">
-                    Viewing listing in company mode
-                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge badge-neutral py-2 px-3">
+                        Viewing listing in company mode
+                    </span>
+                    @if (Model.IsDeadlinePassed)
+                    {
+                        <span class="badge badge-rejected py-2 px-3">
+                            Deadline Expired
+                        </span>
+                    }
+                </div>
+            }
+            else if (User.IsInRole("Admin"))
+            {
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge badge-neutral py-2 px-3">
+                        Viewing listing in admin mode
+                    </span>
+                    @if (Model.IsDeadlinePassed)
+                    {
+                        <span class="badge badge-rejected py-2 px-3">
+                            Deadline Expired
+                        </span>
+                    }
+                </div>
             }
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('applyJobForm');
+            const fileInput = document.getElementById('resumeFile');
+            const errorDiv = document.getElementById('fileClientError');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    validateFile();
+                });
+            }
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    if (!validateFile()) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            function validateFile() {
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    hideError();
+                    return true;
+                }
+
+                const file = fileInput.files[0];
+                const fileName = file.name.toLowerCase();
+                const isPdfExtension = fileName.endsWith('.pdf');
+                const isPdfMime = file.type === 'application/pdf' || file.type === 'application/x-pdf' || file.type === '';
+
+                if (!isPdfExtension || !isPdfMime) {
+                    showError('Only PDF files (.pdf) are accepted. Formats like Word documents, images, and videos are not allowed.');
+                    fileInput.value = '';
+                    return false;
+                }
+
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    showError('The selected PDF file exceeds the maximum allowed size of 5 MB.');
+                    fileInput.value = '';
+                    return false;
+                }
+
+                hideError();
+                return true;
+            }
+
+            function showError(msg) {
+                if (errorDiv) {
+                    errorDiv.textContent = msg;
+                    errorDiv.classList.remove('d-none');
+                }
+            }
+
+            function hideError() {
+                if (errorDiv) {
+                    errorDiv.textContent = '';
+                    errorDiv.classList.add('d-none');
+                }
+            }
+        });
+    </script>
+}

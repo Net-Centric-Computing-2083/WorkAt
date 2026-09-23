@@ -1,0 +1,310 @@
+@model WorkAt.Models.Application
+
+@{
+    ViewData["Title"] = $"Application Details - {Model.JobSeeker?.FirstName} {Model.JobSeeker?.LastName}";
+}
+
+<div class="py-2">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h1 class="h2 mb-0">Application Details</h1>
+                @if (Model.Status == "Accepted")
+                {
+                    <span class="badge badge-accepted">Accepted</span>
+                }
+                else if (Model.Status == "Rejected")
+                {
+                    <span class="badge badge-rejected">Rejected</span>
+                }
+                else
+                {
+                    <span class="badge badge-pending">Pending Review</span>
+                }
+            </div>
+            <p class="text-muted mb-0">Submitted on @Model.AppliedDate.ToLocalTime().ToString("MMMM dd, yyyy - hh:mm tt")</p>
+        </div>
+        <div>
+            <a asp-action="Applications" class="btn btn-outline-secondary">
+                &larr; Back to Applications
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4 mb-4">
+        <!-- Candidate Information & Resume -->
+        <div class="col-lg-6">
+            <!-- Candidate Profile -->
+            <div class="admin-panel mb-4">
+                <div class="admin-panel-header">
+                    <span>Candidate Information</span>
+                    @if (Model.JobSeeker != null)
+                    {
+                        <a asp-action="JobSeekerDetails" asp-route-id="@Model.JobSeeker.JobSeekerId" class="btn btn-sm btn-outline-secondary">
+                            View Candidate Profile &rarr;
+                        </a>
+                    }
+                </div>
+                <div class="admin-panel-body">
+                    @if (Model.JobSeeker != null)
+                    {
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Candidate Name</span>
+                                <span class="fw-semibold text-dark">@Model.JobSeeker.FirstName @Model.JobSeeker.LastName</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Email Address</span>
+                                <span class="text-dark">@(Model.JobSeeker.User?.Email ?? "N/A")</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Phone Number</span>
+                                <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Phone) ? "Not provided" : Model.JobSeeker.Phone)</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Address</span>
+                                <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Address) ? "Not provided" : Model.JobSeeker.Address)</span>
+                            </div>
+
+                            <div class="col-12">
+                                <span class="text-muted small d-block">Verification Status</span>
+                                <span class="badge @(Model.JobSeeker.Status == "Verified" ? "badge-accepted" : Model.JobSeeker.Status == "Rejected" ? "badge-rejected" : "badge-pending")">
+                                    @Model.JobSeeker.Status
+                                </span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">Candidate information is unavailable.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Resume & Attachments -->
+            <div class="admin-panel">
+                <div class="admin-panel-header">
+                    <span>Submitted Resume &amp; Profile</span>
+                </div>
+                <div class="admin-panel-body">
+                    <!-- PDF Attachment if uploaded -->
+                    @if (!string.IsNullOrEmpty(Model.ResumePath))
+                    {
+                        <div class="p-3 mb-3 bg-subtle border rounded d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                            <div>
+                                <div class="fw-semibold text-dark">
+                                    @(string.IsNullOrWhiteSpace(Model.ResumeFileName) ? "Attached PDF Resume.pdf" : Model.ResumeFileName)
+                                </div>
+                                <span class="text-muted small">Uploaded PDF Document</span>
+                            </div>
+                            <div>
+                                <a asp-controller="Application" asp-action="DownloadResume" asp-route-applicationId="@Model.ApplicationId" class="btn btn-sm btn-primary" target="_blank">
+                                    View / Download PDF
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Resume Profile Information -->
+                    @if (Model.JobSeeker?.Resume != null)
+                    {
+                        <div class="mb-3">
+                            <span class="text-muted small d-block fw-semibold">Professional Summary</span>
+                            <p class="text-secondary small mb-0">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Resume.Summary) ? "No summary provided." : Model.JobSeeker.Resume.Summary)</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="text-muted small d-block fw-semibold">Education</span>
+                            <p class="text-secondary small mb-0">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Resume.Education) ? "No education specified." : Model.JobSeeker.Resume.Education)</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="text-muted small d-block fw-semibold">Experience</span>
+                            <p class="text-secondary small mb-0">@(string.IsNullOrWhiteSpace(Model.JobSeeker.Resume.Experience) ? "No experience specified." : Model.JobSeeker.Resume.Experience)</p>
+                        </div>
+
+                        @if (Model.JobSeeker.Resume.ResumeSkills != null && Model.JobSeeker.Resume.ResumeSkills.Any())
+                        {
+                            <div>
+                                <span class="text-muted small d-block fw-semibold mb-1">Skills</span>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var rs in Model.JobSeeker.Resume.ResumeSkills)
+                                    {
+                                        <span class="badge badge-neutral">@rs.Skill?.Name</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else if (string.IsNullOrEmpty(Model.ResumePath))
+                    {
+                        <div class="text-muted small">
+                            No resume attachment or profile recorded for this candidate.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Position & Company Information -->
+        <div class="col-lg-6">
+            <!-- Job Details -->
+            <div class="admin-panel mb-4">
+                <div class="admin-panel-header">
+                    <span>Applied Job Information</span>
+                </div>
+                <div class="admin-panel-body">
+                    @if (Model.Job != null)
+                    {
+                        <h3 class="h5 text-dark mb-1">@Model.Job.Title</h3>
+                        <p class="text-secondary small mb-3">@(Model.Job.Company?.CompanyName ?? "Confidential Company")</p>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Location</span>
+                                <span class="text-dark small">@(string.IsNullOrWhiteSpace(Model.Job.Location) ? "Unspecified" : Model.Job.Location)</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Employment Type</span>
+                                <span class="text-dark small">@(string.IsNullOrWhiteSpace(Model.Job.EmploymentType) ? "Full-Time" : Model.Job.EmploymentType)</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Salary / Compensation</span>
+                                <span class="text-dark small">@(string.IsNullOrWhiteSpace(Model.Job.Salary) ? "Negotiable" : Model.Job.Salary)</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Posted Date</span>
+                                <span class="text-dark small">@Model.Job.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                            </div>
+
+                            @if (Model.Job.Deadline.HasValue)
+                            {
+                                <div class="col-12">
+                                    <span class="text-muted small d-block">Application Deadline</span>
+                                    <span class="small @(Model.Job.IsDeadlinePassed ? "text-danger fw-semibold" : "text-dark")">
+                                        @Model.Job.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")
+                                        @(Model.Job.IsDeadlinePassed ? "(Deadline Passed)" : "")
+                                    </span>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Job.Description))
+                        {
+                            <hr class="my-2" />
+                            <span class="text-muted small d-block mb-1">Job Description</span>
+                            <p class="text-secondary small mb-2" style="white-space: pre-line;">@Model.Job.Description</p>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Job.Requirements))
+                        {
+                            <hr class="my-2" />
+                            <span class="text-muted small d-block mb-1">Requirements</span>
+                            <p class="text-secondary small mb-0" style="white-space: pre-line;">@Model.Job.Requirements</p>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">Job listing information is unavailable.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Company Profile -->
+            <div class="admin-panel mb-4">
+                <div class="admin-panel-header">
+                    <span>Company Profile</span>
+                    @if (Model.Job?.Company != null)
+                    {
+                        <a asp-action="CompanyDetails" asp-route-id="@Model.Job.Company.CompanyId" class="btn btn-sm btn-outline-secondary">
+                            View Company Profile &rarr;
+                        </a>
+                    }
+                </div>
+                <div class="admin-panel-body">
+                    @if (Model.Job?.Company != null)
+                    {
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Company Name</span>
+                                <span class="fw-semibold text-dark">@Model.Job.Company.CompanyName</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Account Email</span>
+                                <span class="text-dark">@(Model.Job.Company.User?.Email ?? "N/A")</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Phone</span>
+                                <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.Job.Company.Phone) ? "Not provided" : Model.Job.Company.Phone)</span>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Website</span>
+                                @if (!string.IsNullOrWhiteSpace(Model.Job.Company.Website))
+                                {
+                                    <a href="@Model.Job.Company.Website" target="_blank" rel="noopener noreferrer" class="text-dark text-decoration-underline small">
+                                        @Model.Job.Company.Website
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">Not provided</span>
+                                }
+                            </div>
+
+                            <div class="col-12">
+                                <span class="text-muted small d-block">Address</span>
+                                <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.Job.Company.Address) ? "Not provided" : Model.Job.Company.Address)</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted small mb-0">Company information is unavailable.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Feedback Details -->
+            <div class="admin-panel">
+                <div class="admin-panel-header">
+                    <span>Company Feedback &amp; Review</span>
+                </div>
+                <div class="admin-panel-body">
+                    @if (Model.Feedback != null && !string.IsNullOrWhiteSpace(Model.Feedback.FeedbackText))
+                    {
+                        <div class="p-3 bg-subtle rounded border">
+                            <p class="text-dark small mb-2" style="white-space: pre-line;">@Model.Feedback.FeedbackText</p>
+                            <span class="text-muted small d-block">
+                                Recorded on @Model.Feedback.FeedbackDate.ToLocalTime().ToString("MMM dd, yyyy - hh:mm tt")
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted small">
+                            No employer feedback recorded for this application yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

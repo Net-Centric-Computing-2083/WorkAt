@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace WorkAt.Models
@@ -36,5 +36,22 @@ namespace WorkAt.Models
 
         // Applications submitted for this job
         public ICollection<Application> Applications { get; set; } = new List<Application>();
+
+        // Computed property: Checks if the job application deadline has passed
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public bool IsDeadlinePassed
+        {
+            get
+            {
+                if (!Deadline.HasValue) return false;
+                var now = DateTime.UtcNow;
+                if (Deadline.Value.TimeOfDay == TimeSpan.Zero)
+                {
+                    // If deadline is date-only (00:00:00), it expires after that date ends
+                    return now.Date > Deadline.Value.Date;
+                }
+                return now > Deadline.Value;
+            }
+        }
     }
 }

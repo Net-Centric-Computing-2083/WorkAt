@@ -14,6 +14,7 @@ namespace WorkAt.Data
 
         public DbSet<Company> Companies { get; set; }
         public DbSet<JobSeeker> JobSeekers { get; set; }
+        public DbSet<Admin> Admins { get; set; }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Application> Applications { get; set; }
         public DbSet<Resume> Resumes { get; set; }
@@ -38,6 +39,13 @@ namespace WorkAt.Data
             builder.Entity<ApplicationFeedback>()
                 .HasIndex(af => af.ApplicationId)
                 .IsUnique();
+
+            // ApplicationUser -> Admin (1:1)
+            builder.Entity<Admin>()
+                .HasOne(a => a.User)
+                .WithOne()
+                .HasForeignKey<Admin>(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // ApplicationUser -> Company (1:1)
             builder.Entity<Company>()

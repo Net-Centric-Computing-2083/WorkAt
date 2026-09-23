@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace WorkAt.Models
 {
@@ -27,6 +27,12 @@ namespace WorkAt.Models
         public string UserId { get; set; } = string.Empty;
 
         public ApplicationUser? User { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string Status { get; set; } = "Pending";
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // A company can post many jobs
         public ICollection<Job> Jobs { get; set; } = new List<Job>();

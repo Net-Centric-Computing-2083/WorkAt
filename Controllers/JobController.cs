@@ -129,8 +129,23 @@ namespace WorkAt.Controllers
         }
 
         // GET: Job/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var userId = _userManager.GetUserId(User);
+            var company = await _context.Companies
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (company == null)
+            {
+                return NotFound("Company profile not found.");
+            }
+
+            if (company.Status != "Verified")
+            {
+                TempData["ErrorMessage"] = "Your account is awaiting Admin verification. You can post jobs after your account has been verified.";
+                return RedirectToAction("Index", "Company");
+            }
+
             return View();
         }
 
@@ -149,6 +164,12 @@ namespace WorkAt.Controllers
                 return NotFound("Company profile not found.");
             }
 
+            if (company.Status != "Verified")
+            {
+                TempData["ErrorMessage"] = "Your account is awaiting Admin verification. You can post jobs after your account has been verified.";
+                return RedirectToAction("Index", "Company");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(job);
@@ -163,6 +184,7 @@ namespace WorkAt.Controllers
             _context.Jobs.Add(job);
             await _context.SaveChangesAsync();
 
+            TempData["SuccessMessage"] = "Job listing published successfully.";
             return RedirectToAction(nameof(Index));
         }
 

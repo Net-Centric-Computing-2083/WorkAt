@@ -8,7 +8,64 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    @if (User.IsInRole("JobSeeker"))
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="py-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+                <div>
+                    <h1 class="h2 mb-1">Admin Dashboard</h1>
+                    <p class="text-muted mb-0">System administration, company and candidate verifications, and platform oversight.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Admin" asp-action="Companies" class="btn btn-secondary">
+                        Companies
+                    </a>
+                    <a asp-controller="Admin" asp-action="JobSeekers" class="btn btn-primary">
+                        Job Seekers
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">Company Management</h3>
+                            <p class="text-secondary small mb-3">Review pending company registrations, verify employers, and manage posting access.</p>
+                            <a asp-controller="Admin" asp-action="Companies" class="btn btn-sm btn-outline-primary">
+                                Manage Companies &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">Job Seeker Verification</h3>
+                            <p class="text-secondary small mb-3">Verify registered job seekers, review candidate credentials, and manage application permissions.</p>
+                            <a asp-controller="Admin" asp-action="JobSeekers" class="btn btn-sm btn-outline-secondary">
+                                Manage Candidates &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-2">Application Logs</h3>
+                            <p class="text-secondary small mb-3">Monitor candidate applications and view submitted PDF resumes across all jobs.</p>
+                            <a asp-controller="Admin" asp-action="Applications" class="btn btn-sm btn-outline-secondary">
+                                View Applications &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (User.IsInRole("JobSeeker"))
     {
         <div class="py-4">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
@@ -130,19 +187,77 @@ else
         <h1 class="hero-title">
             Find Opportunities. Find Talent.
         </h1>
-        <p class="hero-desc">
-            WorkAt connects job seekers with companies to discover opportunities, apply for jobs, and find the right talent.
 
-        </p>
+
+        <!-- Prominent Search Bar on Landing Page -->
+        <div class="card p-3 p-md-4 mb-4 text-start mx-auto" style="max-width: 900px; box-shadow: var(--shadow-card);">
+            <form asp-controller="Jobs" asp-action="Index" method="get">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label for="landingKeyword" class="form-label fw-medium text-dark">Keyword or Title</label>
+                        <input type="text"
+                               id="landingKeyword"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="e.g. AI Engineer, Python, Software..." />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="landingLocation" class="form-label fw-medium text-dark">Location</label>
+                        <input type="text"
+                               id="landingLocation"
+                               name="location"
+                               class="form-control"
+                               placeholder="e.g. Kathmandu, Remote..." />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="landingEmploymentType" class="form-label fw-medium text-dark">Employment Type</label>
+                        <select id="landingEmploymentType" name="employmentType" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="Full Time">Full Time</option>
+                            <option value="Part Time">Part Time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Internship">Internship</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            Search Jobs
+                        </button>
+                    </div>
+
+                    <div class="col-12 mt-2 pt-2 border-top d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">Filter by Salary:</span>
+                            <select name="salary" class="form-select form-select-sm" style="width: auto; min-width: 150px;">
+                                <option value="">Any Salary</option>
+                                <option value="under-30k">Under 30,000</option>
+                                <option value="30k-50k">30,000 - 50,000</option>
+                                <option value="50k-100k">50,000 - 100,000</option>
+                                <option value="100k+">100,000+</option>
+                            </select>
+                        </div>
+                        <div class="text-muted small">
+                            Popular: 
+                            <a asp-controller="Jobs" asp-action="Index" asp-route-keyword="AI" class="text-secondary text-decoration-underline ms-1">AI</a>,
+                            <a asp-controller="Jobs" asp-action="Index" asp-route-keyword="developer" class="text-secondary text-decoration-underline ms-1">Developer</a>,
+                            <a asp-controller="Jobs" asp-action="Index" asp-route-keyword="python" class="text-secondary text-decoration-underline ms-1">Python</a>,
+                            <a asp-controller="Jobs" asp-action="Index" asp-route-location="Kathmandu" class="text-secondary text-decoration-underline ms-1">Kathmandu</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="hero-cta">
             <a asp-controller="Jobs" asp-action="Index" class="btn btn-primary btn-lg">
-                Find Jobs
+                Browse All Openings
             </a>
             <a asp-controller="Account" asp-action="Register" asp-route-role="Company" class="btn btn-secondary btn-lg">
-                Post a Job
+                Post a Job as Employer
             </a>
         </div>
     </section>
-
-
 }

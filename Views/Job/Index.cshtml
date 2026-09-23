@@ -119,7 +119,21 @@
                                         @job.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")
                                     </td>
                                     <td class="text-muted small">
-                                        @(job.Deadline?.ToLocalTime().ToString("MMM dd, yyyy") ?? "Open")
+                                        @if (job.Deadline.HasValue)
+                                        {
+                                            if (job.IsDeadlinePassed)
+                                            {
+                                                <span class="badge badge-rejected">Expired (@job.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy"))</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@job.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Open</span>
+                                        }
                                     </td>
                                     <td class="text-end">
                                         <div class="d-inline-flex gap-1">

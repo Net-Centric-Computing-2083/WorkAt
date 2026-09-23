@@ -1,7 +1,7 @@
-@model WorkAt.Models.CompanyApplicationsViewModel
+@model WorkAt.Models.AdminCompaniesViewModel
 
 @{
-    ViewData["Title"] = "Candidate Applications";
+    ViewData["Title"] = "Manage Companies";
     var startItem = Model.TotalItems == 0 ? 0 : (Model.PageIndex - 1) * Model.PageSize + 1;
     var endItem = Math.Min(Model.PageIndex * Model.PageSize, Model.TotalItems);
 }
@@ -10,8 +10,13 @@
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
         <div>
-            <h1 class="h2 mb-1">Candidate Applications</h1>
-            <p class="text-muted mb-0">Review candidates and manage hiring decisions for your open roles.</p>
+            <h1 class="h2 mb-1">Manage Companies</h1>
+            <p class="text-muted mb-0">Review company verification requests and manage registered employer profiles.</p>
+        </div>
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                &larr; Back to Dashboard
+            </a>
         </div>
     </div>
 
@@ -23,53 +28,37 @@
         </div>
     }
 
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-            <span>@TempData["ErrorMessage"]</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
     <!-- Search & Filter Controls -->
-    <div class="card p-3 mb-4">
-        <form asp-action="CompanyApplications" method="get">
+    <div class="admin-filter-card mb-4">
+        <form asp-action="Companies" method="get">
             <div class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <label for="search" class="form-label">Search Candidates</label>
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Search Companies</label>
                     <input type="text"
                            id="search"
                            name="search"
                            class="form-control"
-                           placeholder="Search by applicant name or job title..."
+                           placeholder="Search by company name, email, phone, location..."
                            value="@Model.Search" />
                 </div>
 
-                <div class="col-md-3">
-                    <label for="status" class="form-label">Status</label>
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Verification Status</label>
                     <select id="status" name="status" class="form-select">
                         <option value="">All Statuses</option>
                         <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
-                        <option value="Accepted" selected="@(Model.Status == "Accepted")">Accepted</option>
+                        <option value="Verified" selected="@(Model.Status == "Verified")">Verified</option>
                         <option value="Rejected" selected="@(Model.Status == "Rejected")">Rejected</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label for="sortOrder" class="form-label">Sort By Date</label>
-                    <select id="sortOrder" name="sortOrder" class="form-select">
-                        <option value="desc" selected="@(Model.SortOrder == "desc")">Newest First (Descending)</option>
-                        <option value="asc" selected="@(Model.SortOrder == "asc")">Oldest First (Ascending)</option>
                     </select>
                 </div>
 
                 <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">
-                        Apply
+                        Filter
                     </button>
-                    @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.Status) || Model.SortOrder == "asc")
+                    @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.Status))
                     {
-                        <a asp-action="CompanyApplications" class="btn btn-secondary" title="Clear Filters">
+                        <a asp-action="Companies" class="btn btn-secondary" title="Clear Filters">
                             Clear
                         </a>
                     }
@@ -78,59 +67,69 @@
         </form>
     </div>
 
-    @if (!Model.Applications.Any())
+    @if (!Model.Companies.Any())
     {
-        <div class="card p-5 text-center">
-            <h3 class="h5 text-dark mb-2">No applications found</h3>
-            <p class="text-muted small mb-0">No candidate applications match your current search or filter parameters.</p>
+        <div class="admin-panel p-5 text-center">
+            <h3 class="h5 text-dark mb-2">No companies found</h3>
+            <p class="text-muted small mb-0">No company records match your current search or status filter.</p>
         </div>
     }
     else
     {
-        <div class="card">
+        <div class="admin-panel">
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th class="text-center" style="width: 60px;">No.</th>
-                            <th>Candidate</th>
-                            <th>Applied For</th>
-                            <th>Contact</th>
-                            <th>Applied Date</th>
+                            <th class="text-center" style="width: 50px;">No.</th>
+                            <th>Company Name</th>
+                            <th>Email</th>
+                            <th>Contact / Location</th>
+                            <th>Registration Date</th>
                             <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @{
-                            var appList = Model.Applications.ToList();
-                            for (int i = 0; i < appList.Count; i++)
+                            var compList = Model.Companies.ToList();
+                            for (int i = 0; i < compList.Count; i++)
                             {
-                                var app = appList[i];
+                                var c = compList[i];
                                 int displayNo = (Model.PageIndex - 1) * Model.PageSize + i + 1;
                                 <tr>
                                     <td class="text-center text-muted small fw-medium">@displayNo</td>
                                     <td>
                                         <div class="fw-semibold text-dark">
-                                            @app.JobSeeker?.FirstName @app.JobSeeker?.LastName
+                                            <a asp-action="CompanyDetails" asp-route-id="@c.CompanyId" class="text-dark text-decoration-none">
+                                                @c.CompanyName
+                                            </a>
                                         </div>
+                                        @if (!string.IsNullOrWhiteSpace(c.Website))
+                                        {
+                                            <div class="text-muted small">
+                                                <a href="@c.Website" target="_blank" rel="noopener noreferrer" class="text-secondary small">
+                                                    @c.Website
+                                                </a>
+                                            </div>
+                                        }
                                     </td>
                                     <td>
-                                        <span class="fw-medium">@(app.Job?.Title ?? "Unknown Role")</span>
+                                        <span class="text-dark">@(c.User?.Email ?? "N/A")</span>
                                     </td>
                                     <td>
-                                        <div class="small text-dark">@(app.JobSeeker?.User?.Email ?? "N/A")</div>
-                                        <div class="small text-muted">@(string.IsNullOrWhiteSpace(app.JobSeeker?.Phone) ? "No phone" : app.JobSeeker?.Phone)</div>
+                                        <div class="text-dark small">@(string.IsNullOrWhiteSpace(c.Phone) ? "—" : c.Phone)</div>
+                                        <div class="text-muted small">@(string.IsNullOrWhiteSpace(c.Address) ? "—" : c.Address)</div>
                                     </td>
                                     <td class="text-muted small">
-                                        @app.AppliedDate.ToLocalTime().ToString("MMM dd, yyyy")
+                                        @c.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")
                                     </td>
                                     <td>
-                                        @if (app.Status == "Accepted")
+                                        @if (c.Status == "Verified")
                                         {
-                                            <span class="badge badge-accepted">Accepted</span>
+                                            <span class="badge badge-accepted">Verified</span>
                                         }
-                                        else if (app.Status == "Rejected")
+                                        else if (c.Status == "Rejected")
                                         {
                                             <span class="badge badge-rejected">Rejected</span>
                                         }
@@ -141,24 +140,25 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="d-inline-flex align-items-center gap-1">
-                                            <a asp-action="Details" asp-route-id="@app.ApplicationId" class="btn btn-sm btn-outline-secondary">
-                                                View
+                                            <a asp-action="CompanyDetails" asp-route-id="@c.CompanyId" class="btn btn-sm btn-outline-secondary" title="View Profile">
+                                                Details
                                             </a>
 
-                                            @if (app.Status == "Pending")
+                                            @if (c.Status != "Verified")
                                             {
-                                                <form asp-action="Accept" method="post" class="d-inline">
+                                                <form asp-action="VerifyCompany" asp-route-id="@c.CompanyId" method="post" class="d-inline">
                                                     @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@app.ApplicationId" />
-                                                    <button type="submit" class="btn btn-sm btn-success" title="Accept Application">
-                                                        Accept
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Approve and Verify Company">
+                                                        Verify
                                                     </button>
                                                 </form>
+                                            }
 
-                                                <form asp-action="Reject" method="post" class="d-inline">
+                                            @if (c.Status != "Rejected")
+                                            {
+                                                <form asp-action="RejectCompany" asp-route-id="@c.CompanyId" method="post" class="d-inline">
                                                     @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="id" value="@app.ApplicationId" />
-                                                    <button type="submit" class="btn btn-sm btn-danger" title="Reject Application">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Reject Company">
                                                         Reject
                                                     </button>
                                                 </form>
@@ -173,39 +173,36 @@
             </div>
 
             <!-- Pagination Footer -->
-            <div class="card-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <div class="admin-panel-footer d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
                 <span class="text-muted small">
-                    Showing @startItem to @endItem of @Model.TotalItems application@(Model.TotalItems == 1 ? "" : "s")
+                    Showing @startItem to @endItem of @Model.TotalItems compan@(Model.TotalItems == 1 ? "y" : "ies")
                 </span>
 
                 @if (Model.TotalPages > 1)
                 {
-                    <nav aria-label="Candidate Applications Pagination">
+                    <nav aria-label="Company Pagination">
                         <ul class="pagination pagination-sm mb-0">
                             <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
-                                <a class="page-link" asp-action="CompanyApplications"
+                                <a class="page-link" asp-action="Companies"
                                    asp-route-search="@Model.Search"
                                    asp-route-status="@Model.Status"
-                                   asp-route-sortOrder="@Model.SortOrder"
                                    asp-route-page="@(Model.PageIndex - 1)">&laquo; Prev</a>
                             </li>
 
                             @for (int p = 1; p <= Model.TotalPages; p++)
                             {
                                 <li class="page-item @(p == Model.PageIndex ? "active" : "")">
-                                    <a class="page-link" asp-action="CompanyApplications"
+                                    <a class="page-link" asp-action="Companies"
                                        asp-route-search="@Model.Search"
                                        asp-route-status="@Model.Status"
-                                       asp-route-sortOrder="@Model.SortOrder"
                                        asp-route-page="@p">@p</a>
                                 </li>
                             }
 
                             <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
-                                <a class="page-link" asp-action="CompanyApplications"
+                                <a class="page-link" asp-action="Companies"
                                    asp-route-search="@Model.Search"
                                    asp-route-status="@Model.Status"
-                                   asp-route-sortOrder="@Model.SortOrder"
                                    asp-route-page="@(Model.PageIndex + 1)">Next &raquo;</a>
                             </li>
                         </ul>

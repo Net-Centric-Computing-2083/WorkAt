@@ -15,19 +15,70 @@
         </div>
     }
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <span>@TempData["ErrorMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Verification Status Banner -->
+    @if (Model.Status == "Pending")
+    {
+        <div class="alert alert-info d-flex align-items-center gap-3 mb-4" role="alert">
+            <div>
+                <span class="badge badge-pending me-2">Pending Verification</span>
+                <strong>Account Awaiting Admin Approval:</strong> Your company profile is currently being reviewed by an administrator. You will be able to post jobs once your account is verified.
+            </div>
+        </div>
+    }
+    else if (Model.Status == "Rejected")
+    {
+        <div class="alert alert-danger d-flex align-items-center gap-3 mb-4" role="alert">
+            <div>
+                <span class="badge badge-rejected me-2">Verification Rejected</span>
+                <strong>Account Verification Suspended:</strong> Your company account has been rejected or unverified by an administrator. Job posting privileges are currently disabled.
+            </div>
+        </div>
+    }
+
     <!-- Page Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
         <div>
-            <h1 class="h2 mb-1">@Model.CompanyName</h1>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h1 class="h2 mb-0">@Model.CompanyName</h1>
+                @if (Model.Status == "Verified")
+                {
+                    <span class="badge badge-accepted">Verified</span>
+                }
+                else if (Model.Status == "Rejected")
+                {
+                    <span class="badge badge-rejected">Rejected</span>
+                }
+                else
+                {
+                    <span class="badge badge-pending">Pending</span>
+                }
+            </div>
             <p class="text-muted mb-0">Company Profile &amp; Recruitment Overview</p>
         </div>
         <div class="d-flex gap-2">
             <a asp-action="Edit" class="btn btn-secondary">
                 Edit Profile
             </a>
-            <a asp-controller="Job" asp-action="Create" class="btn btn-primary">
-                Post a Job
-            </a>
+            @if (Model.Status == "Verified")
+            {
+                <a asp-controller="Job" asp-action="Create" class="btn btn-primary">
+                    Post a Job
+                </a>
+            }
+            else
+            {
+                <button type="button" class="btn btn-primary opacity-50" disabled title="Requires Admin verification to post jobs">
+                    Post a Job (Awaiting Verification)
+                </button>
+            }
         </div>
     </div>
 

@@ -28,15 +28,15 @@ namespace WorkAt.Controllers
         [Authorize(Roles = "JobSeeker")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int jobId)
+        public async Task<IActionResult> Create(int jobId, IFormFile? resumeFile)
         {
-            return await Apply(jobId);
+            return await Apply(jobId, resumeFile);
         }
 
         [Authorize(Roles = "JobSeeker")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Apply(int jobId)
+        public async Task<IActionResult> Apply(int jobId, IFormFile? resumeFile)
         {
             // Get the currently logged-in Identity user's ID
             var userId = _userManager.GetUserId(User);
@@ -55,6 +55,18 @@ namespace WorkAt.Controllers
                 return NotFound("JobSeeker profile not found.");
             }
 
+            // Verification Rule: Job Seeker must be verified by Admin
+            if (jobSeeker.Status != "Verified")
+            {
+                TempData["ErrorMessage"] =
+                    "Your account is awaiting Admin verification. You can apply for jobs after your account has been verified.";
+
+                return RedirectToAction(
+                    "Details",
+                    "JobSearch",
+                    new { id = jobId });
+            }
+
             // Make sure the selected job exists
             var job = await _context.Jobs
                 .FirstOrDefaultAsync(j => j.JobId == jobId);
@@ -62,6 +74,18 @@ namespace WorkAt.Controllers
             if (job == null)
             {
                 return NotFound("Job not found.");
+            }
+
+            // Deadline check: Prevent applications after the job deadline has passed
+            if (job.IsDeadlinePassed)
+            {
+                TempData["ErrorMessage"] =
+                    "The application deadline for this position has passed. New applications are no longer being accepted.";
+
+                return RedirectToAction(
+                    "Details",
+                    "JobSearch",
+                    new { id = jobId });
             }
 
             // Prevent the same JobSeeker from applying to the same Job twice
@@ -81,23 +105,151 @@ namespace WorkAt.Controllers
                     new { id = jobId });
             }
 
+            string? savedResumePath = null;
+            string? originalFileName = null;
+
+            // Handle PDF Resume Attachment if uploaded
+            if (resumeFile != null && resumeFile.Length > 0)
+            {
+                // 1. Validate file extension (strictly .pdf only)
+                var extension = Path.GetExtension(resumeFile.FileName).ToLowerInvariant();
+                if (extension != ".pdf")
+                {
+                    TempData["ErrorMessage"] = "Only PDF files (.pdf) are accepted as resume attachments. Other file types (images, Word docs, videos) are not allowed.";
+                    return RedirectToAction("Details", "JobSearch", new { id = jobId });
+                }
+
+                // 2. Validate MIME content type
+                var contentType = resumeFile.ContentType?.ToLowerInvariant() ?? string.Empty;
+                if (contentType != "application/pdf" && contentType != "application/x-pdf")
+                {
+                    TempData["ErrorMessage"] = "Only valid PDF documents are accepted. The uploaded file type is invalid.";
+                    return RedirectToAction("Details", "JobSearch", new { id = jobId });
+                }
+
+                // 3. Validate file size (max 5 MB)
+                if (resumeFile.Length > 5 * 1024 * 1024)
+                {
+                    TempData["ErrorMessage"] = "The uploaded PDF resume exceeds the maximum allowed size of 5 MB.";
+                    return RedirectToAction("Details", "JobSearch", new { id = jobId });
+                }
+
+                // 4. Validate PDF magic bytes (%PDF)
+                using (var stream = resumeFile.OpenReadStream())
+                {
+                    byte[] header = new byte[4];
+                    int bytesRead = await stream.ReadAsync(header, 0, 4);
+                    if (bytesRead < 4 || header[0] != 0x25 || header[1] != 0x50 || header[2] != 0x44 || header[3] != 0x46) // "%PDF"
+                    {
+                        TempData["ErrorMessage"] = "Invalid PDF file. Please upload a genuine PDF document.";
+                        return RedirectToAction("Details", "JobSearch", new { id = jobId });
+                    }
+                }
+
+                // Safe unique filename
+                var uniqueFileName = $"{Guid.NewGuid():N}.pdf";
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "resumes");
+
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var physicalPath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var fileStream = new FileStream(physicalPath, FileMode.Create))
+                {
+                    await resumeFile.CopyToAsync(fileStream);
+                }
+
+                savedResumePath = "/uploads/resumes/" + uniqueFileName;
+                originalFileName = Path.GetFileName(resumeFile.FileName);
+            }
+
             // Create the application
             var application = new Application
             {
                 JobId = jobId,
                 JobSeekerId = jobSeeker.JobSeekerId,
                 AppliedDate = DateTime.UtcNow,
-                Status = "Pending"
+                Status = "Pending",
+                ResumePath = savedResumePath,
+                ResumeFileName = originalFileName
             };
 
             _context.Applications.Add(application);
-
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] =
                 "Your application has been submitted successfully.";
 
             return RedirectToAction(nameof(MyApplications));
+        }
+
+        // =========================================================
+        // RESUME DOWNLOAD / VIEW (PDF)
+        // =========================================================
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> DownloadResume(int applicationId)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            var application = await _context.Applications
+                .Include(a => a.Job)
+                .Include(a => a.JobSeeker)
+                .FirstOrDefaultAsync(a => a.ApplicationId == applicationId);
+
+            if (application == null || string.IsNullOrEmpty(application.ResumePath))
+            {
+                return NotFound("Resume not found.");
+            }
+
+            // Authorization check: User must be JobSeeker who applied, Company who owns job, or Admin
+            bool isAuthorized = false;
+
+            if (User.IsInRole("Admin"))
+            {
+                isAuthorized = true;
+            }
+            else if (User.IsInRole("JobSeeker"))
+            {
+                if (application.JobSeeker != null && application.JobSeeker.UserId == userId)
+                {
+                    isAuthorized = true;
+                }
+            }
+            else if (User.IsInRole("Company"))
+            {
+                var company = await _context.Companies.FirstOrDefaultAsync(c => c.UserId == userId);
+                if (company != null && application.Job != null && application.Job.CompanyId == company.CompanyId)
+                {
+                    isAuthorized = true;
+                }
+            }
+
+            if (!isAuthorized)
+            {
+                return Forbid();
+            }
+
+            var relativePath = application.ResumePath.TrimStart('/');
+            var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace('/', Path.DirectorySeparatorChar));
+
+            if (!System.IO.File.Exists(physicalPath))
+            {
+                return NotFound("Resume file was not found on the server.");
+            }
+
+            var downloadName = !string.IsNullOrWhiteSpace(application.ResumeFileName)
+                ? application.ResumeFileName
+                : "Resume.pdf";
+
+            return PhysicalFile(physicalPath, "application/pdf", downloadName);
         }
 
         // =========================================================

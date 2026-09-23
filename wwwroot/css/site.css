@@ -498,14 +498,14 @@ a {
     }
 
 /* ==========================================================================
-   Badges / Status Pills
+   Badges / Status Indicators
    ========================================================================== */
 
 .badge {
     font-size: 0.75rem;
     font-weight: 500;
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-full);
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-sm);
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -534,6 +534,106 @@ a {
     background-color: var(--bg-subtle);
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   Admin Dashboard & UI Refinements
+   ========================================================================== */
+
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.admin-stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: border-color var(--transition-fast);
+}
+
+.admin-stat-card:hover {
+    border-color: var(--border-hover);
+}
+
+.admin-stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+}
+
+.admin-stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+
+.admin-stat-footer {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.admin-stat-link {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.admin-stat-link:hover {
+    color: var(--text-secondary);
+}
+
+.admin-filter-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.15rem 1.35rem;
+}
+
+.admin-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.admin-panel-header {
+    background-color: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.925rem;
+    font-weight: 600;
+}
+
+.admin-panel-body {
+    padding: 1.35rem;
+}
+
+.admin-panel-footer {
+    background-color: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
+    padding: 0.85rem 1.35rem;
 }
 
 /* ==========================================================================

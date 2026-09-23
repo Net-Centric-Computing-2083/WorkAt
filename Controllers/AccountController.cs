@@ -29,11 +29,11 @@ namespace WorkAt.Controllers
         // =========================================================
 
         [HttpGet]
-        public IActionResult Register(string? role = null)
+        public async Task<IActionResult> Register(string? role = null)
         {
             if (_signInManager.IsSignedIn(User))
             {
-                return RedirectUserByRole();
+                return await RedirectUserByRoleAsync();
             }
 
             var model = new RegisterViewModel();
@@ -205,7 +205,9 @@ namespace WorkAt.Controllers
                         Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address,
                         Website = string.IsNullOrWhiteSpace(model.Website) ? null : model.Website,
                         Description = string.IsNullOrWhiteSpace(model.Description) ? null : model.Description,
-                        UserId = user.Id
+                        UserId = user.Id,
+                        Status = "Pending",
+                        CreatedAt = DateTime.UtcNow
                     };
 
                     _context.Companies.Add(company);
@@ -218,7 +220,9 @@ namespace WorkAt.Controllers
                         LastName = model.LastName!,
                         Phone = model.Phone,
                         Address = string.IsNullOrWhiteSpace(model.Address) ? null : model.Address,
-                        UserId = user.Id
+                        UserId = user.Id,
+                        Status = "Pending",
+                        CreatedAt = DateTime.UtcNow
                     };
 
                     _context.JobSeekers.Add(jobSeeker);
@@ -236,14 +240,7 @@ namespace WorkAt.Controllers
 
             await _signInManager.SignInAsync(user, isPersistent: false);
 
-            if (model.AccountType == "Company")
-            {
-                return RedirectToAction("Index", "Company");
-            }
-            else
-            {
-                return RedirectToAction("Index", "JobSeeker");
-            }
+            return await RedirectUserByRoleAsync(null, user);
         }
 
         // =========================================================
@@ -251,11 +248,11 @@ namespace WorkAt.Controllers
         // =========================================================
 
         [HttpGet]
-        public IActionResult Login(string? returnUrl = null)
+        public async Task<IActionResult> Login(string? returnUrl = null)
         {
             if (_signInManager.IsSignedIn(User))
             {
-                return RedirectUserByRole(returnUrl);
+                return await RedirectUserByRoleAsync(returnUrl);
             }
 
             ViewData["ReturnUrl"] = returnUrl;
@@ -288,7 +285,7 @@ namespace WorkAt.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectUserByRole(returnUrl, user);
+                return await RedirectUserByRoleAsync(returnUrl, user);
             }
 
             if (result.IsLockedOut)
@@ -327,20 +324,42 @@ namespace WorkAt.Controllers
         // HELPER
         // =========================================================
 
-        private IActionResult RedirectUserByRole(string? returnUrl = null, ApplicationUser? user = null)
+        private async Task<IActionResult> RedirectUserByRoleAsync(string? returnUrl = null, ApplicationUser? user = null)
         {
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
 
-            if (User.IsInRole("Company"))
+            if (user != null)
             {
-                return RedirectToAction("Index", "Company");
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                if (await _userManager.IsInRoleAsync(user, "Company"))
+                {
+                    return RedirectToAction("Index", "Company");
+                }
+                if (await _userManager.IsInRoleAsync(user, "JobSeeker"))
+                {
+                    return RedirectToAction("Index", "JobSeeker");
+                }
             }
-            else if (User.IsInRole("JobSeeker"))
+            else
             {
-                return RedirectToAction("Index", "JobSeeker");
+                if (User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                if (User.IsInRole("Company"))
+                {
+                    return RedirectToAction("Index", "Company");
+                }
+                if (User.IsInRole("JobSeeker"))
+                {
+                    return RedirectToAction("Index", "JobSeeker");
+                }
             }
 
             return RedirectToAction("Index", "Home");

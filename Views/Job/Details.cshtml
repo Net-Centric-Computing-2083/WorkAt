@@ -31,7 +31,14 @@
                     <span class="job-meta-tag">Posted @Model.PostedDate.ToLocalTime().ToString("MMM dd, yyyy")</span>
                     @if (Model.Deadline.HasValue)
                     {
-                        <span class="job-meta-tag text-muted">Deadline: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                        if (Model.IsDeadlinePassed)
+                        {
+                            <span class="job-meta-tag badge-rejected">Deadline Passed: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                        }
+                        else
+                        {
+                            <span class="job-meta-tag text-muted">Deadline: @Model.Deadline.Value.ToLocalTime().ToString("MMM dd, yyyy")</span>
+                        }
                     }
                 </div>
             </div>

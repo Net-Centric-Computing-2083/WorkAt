@@ -28,7 +28,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
         <div>
             <h1 class="h2 mb-1">Application Details</h1>
-            <p class="text-muted mb-0">Application ID #@Model.ApplicationId &bull; Submitted @Model.AppliedDate.ToLocalTime().ToString("MMM dd, yyyy - hh:mm tt")</p>
+            <p class="text-muted mb-0">Submitted @Model.AppliedDate.ToLocalTime().ToString("MMM dd, yyyy - hh:mm tt")</p>
         </div>
         <div>
             @if (isCompany)
@@ -109,24 +109,24 @@
                     {
                         <hr />
                         <h6 class="fw-bold text-dark">Description</h6>
-                        <p class="text-muted small mb-3">@Model.Job.Description</p>
+                        <p class="text-muted small mb-3" style="white-space: pre-line;">@Model.Job.Description</p>
                     }
 
                     @if (!string.IsNullOrWhiteSpace(Model.Job?.Requirements))
                     {
                         <hr />
                         <h6 class="fw-bold text-dark">Requirements</h6>
-                        <p class="text-muted small mb-0">@Model.Job.Requirements</p>
+                        <p class="text-muted small mb-0" style="white-space: pre-line;">@Model.Job.Requirements</p>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- Applicant & Resume Card -->
+        <!-- Applicant Profile Card -->
         <div class="col-lg-6">
             <div class="card h-100">
                 <div class="card-header bg-white border-bottom py-3">
-                    <h5 class="mb-0 fw-bold">Applicant Resume & Info</h5>
+                    <h5 class="mb-0 fw-bold">Applicant Information</h5>
                 </div>
                 <div class="card-body">
                     @if (Model.JobSeeker != null)
@@ -189,7 +189,7 @@
                         else
                         {
                             <div class="alert alert-info text-muted small mb-0">
-                                Candidate has not created a resume profile.
+                                Candidate has not created an online resume profile.
                             </div>
                         }
                     }
@@ -201,6 +201,44 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- In-App PDF Resume Viewer Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Candidate Resume (PDF)</h5>
+            @if (!string.IsNullOrEmpty(Model.ResumePath))
+            {
+                <span class="text-muted small">
+                    @(string.IsNullOrWhiteSpace(Model.ResumeFileName) ? "Resume.pdf" : Model.ResumeFileName)
+                </span>
+            }
+        </div>
+        <div class="card-body p-3">
+            @if (!string.IsNullOrEmpty(Model.ResumePath))
+            {
+                <div class="border rounded bg-light" style="position: relative; width: 100%; height: 750px; overflow: hidden;">
+                    <iframe src="@Model.ResumePath#toolbar=1"
+                            title="Candidate Resume Document"
+                            width="100%"
+                            height="100%"
+                            style="border: 0; display: block;"
+                            loading="lazy">
+                        <div class="p-4 text-center">
+                            <p class="text-muted mb-2">Your browser does not support embedded PDF viewing.</p>
+                            <a href="@Model.ResumePath" target="_blank" class="btn btn-sm btn-primary">Open PDF in New Window</a>
+                        </div>
+                    </iframe>
+                </div>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    <div class="fw-semibold text-dark mb-1">No resume uploaded.</div>
+                    <p class="small text-muted mb-0">The candidate did not attach a PDF resume with this application.</p>
+                </div>
+            }
+        </div>
     </div>
 
     <!-- Company Feedback Section -->

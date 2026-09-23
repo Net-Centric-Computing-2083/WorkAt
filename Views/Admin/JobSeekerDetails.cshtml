@@ -1,0 +1,209 @@
+@model WorkAt.Models.JobSeeker
+
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Job Seeker Details";
+}
+
+<div class="py-2">
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h1 class="h2 mb-0">@Model.FirstName @Model.LastName</h1>
+                @if (Model.Status == "Verified")
+                {
+                    <span class="badge badge-accepted">Verified</span>
+                }
+                else if (Model.Status == "Rejected")
+                {
+                    <span class="badge badge-rejected">Rejected</span>
+                }
+                else
+                {
+                    <span class="badge badge-pending">Pending</span>
+                }
+            </div>
+            <p class="text-muted mb-0">Registered @Model.CreatedAt.ToLocalTime().ToString("MMMM dd, yyyy")</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="JobSeekers" class="btn btn-outline-secondary">
+                &larr; Back to Job Seekers
+            </a>
+
+            @if (Model.Status != "Verified")
+            {
+                <form asp-action="VerifyJobSeeker" asp-route-id="@Model.JobSeekerId" asp-route-returnUrl="@Url.Action("JobSeekerDetails", new { id = Model.JobSeekerId })" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success">
+                        Verify Candidate
+                    </button>
+                </form>
+            }
+
+            @if (Model.Status != "Rejected")
+            {
+                <form asp-action="RejectJobSeeker" asp-route-id="@Model.JobSeekerId" asp-route-returnUrl="@Url.Action("JobSeekerDetails", new { id = Model.JobSeekerId })" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        Reject Candidate
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4 mb-4">
+        <!-- Personal Information & Resume -->
+        <div class="col-lg-6">
+            <div class="admin-panel mb-4">
+                <div class="admin-panel-header">
+                    <span>Candidate Profile</span>
+                </div>
+                <div class="admin-panel-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Full Name</span>
+                            <span class="fw-semibold text-dark">@Model.FirstName @Model.LastName</span>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Email Address</span>
+                            <span class="text-dark">@(Model.User?.Email ?? "N/A")</span>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Phone Number</span>
+                            <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.Phone) ? "Not provided" : Model.Phone)</span>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Address</span>
+                            <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.Address) ? "Not provided" : Model.Address)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Profile Details -->
+            <div class="admin-panel">
+                <div class="admin-panel-header">
+                    <span>Resume Profile</span>
+                </div>
+                <div class="admin-panel-body">
+                    @if (Model.Resume != null)
+                    {
+                        <div class="mb-3">
+                            <span class="text-muted small d-block fw-semibold">Professional Summary</span>
+                            <p class="text-secondary small mb-0">@(string.IsNullOrWhiteSpace(Model.Resume.Summary) ? "None" : Model.Resume.Summary)</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="text-muted small d-block fw-semibold">Education</span>
+                            <p class="text-secondary small mb-0">@(string.IsNullOrWhiteSpace(Model.Resume.Education) ? "None" : Model.Resume.Education)</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <span class="text-muted small d-block fw-semibold">Experience</span>
+                            <p class="text-secondary small mb-0">@(string.IsNullOrWhiteSpace(Model.Resume.Experience) ? "None" : Model.Resume.Experience)</p>
+                        </div>
+
+                        @if (Model.Resume.ResumeSkills != null && Model.Resume.ResumeSkills.Any())
+                        {
+                            <div>
+                                <span class="text-muted small d-block fw-semibold mb-1">Skills</span>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var rs in Model.Resume.ResumeSkills)
+                                    {
+                                        <span class="badge badge-neutral">@rs.Skill?.Name</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted small">
+                            Candidate has not created a resume profile yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Application History -->
+        <div class="col-lg-6">
+            <div class="admin-panel h-100">
+                <div class="admin-panel-header">
+                    <span>Submitted Applications (@(Model.Applications?.Count ?? 0))</span>
+                </div>
+                <div>
+                    @if (Model.Applications != null && Model.Applications.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Company</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var app in Model.Applications.OrderByDescending(a => a.AppliedDate))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-semibold text-dark">@(app.Job?.Title ?? "Unknown Role")</div>
+                                            </td>
+                                            <td class="text-muted small">
+                                                @(app.Job?.Company?.CompanyName ?? "Unknown Company")
+                                            </td>
+                                            <td class="text-muted small">
+                                                @app.AppliedDate.ToLocalTime().ToString("MMM dd, yyyy")
+                                            </td>
+                                            <td>
+                                                @if (app.Status == "Accepted")
+                                                {
+                                                    <span class="badge badge-accepted">Accepted</span>
+                                                }
+                                                else if (app.Status == "Rejected")
+                                                {
+                                                    <span class="badge badge-rejected">Rejected</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-pending">Pending</span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                <a asp-action="ApplicationDetails" asp-route-id="@app.ApplicationId" class="btn btn-sm btn-outline-secondary">
+                                                    View Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted small">
+                            Candidate has not submitted any job applications yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

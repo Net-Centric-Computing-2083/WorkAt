@@ -17,13 +17,13 @@
     <div class="card p-3 mb-4">
         <form asp-controller="JobSearch" asp-action="Index" method="get">
             <div class="row g-2 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="keyword" class="form-label">Keyword or Title</label>
                     <input type="text"
                            id="keyword"
                            name="keyword"
                            class="form-control"
-                           placeholder="e.g. AI Engineer, Designer"
+                           placeholder="e.g. AI Engineer, Python"
                            value="@Model.Keyword" />
                 </div>
 
@@ -37,7 +37,7 @@
                            value="@Model.Location" />
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="employmentType" class="form-label">Employment Type</label>
                     <select id="employmentType" name="employmentType" class="form-select">
                         <option value="">All Types</option>
@@ -48,11 +48,22 @@
                     </select>
                 </div>
 
+                <div class="col-md-2">
+                    <label for="salary" class="form-label">Salary Range</label>
+                    <select id="salary" name="salary" class="form-select">
+                        <option value="">Any Salary</option>
+                        <option value="under-30k" selected="@(Model.Salary == "under-30k")">Under 30,000</option>
+                        <option value="30k-50k" selected="@(Model.Salary == "30k-50k")">30,000 - 50,000</option>
+                        <option value="50k-100k" selected="@(Model.Salary == "50k-100k" || Model.Salary == "50k+")">50,000 - 100,000</option>
+                        <option value="100k+" selected="@(Model.Salary == "100k+")">100,000+</option>
+                    </select>
+                </div>
+
                 <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">
                         Search
                     </button>
-                    @if (!string.IsNullOrEmpty(Model.Keyword) || !string.IsNullOrEmpty(Model.Location) || !string.IsNullOrEmpty(Model.EmploymentType))
+                    @if (!string.IsNullOrEmpty(Model.Keyword) || !string.IsNullOrEmpty(Model.Location) || !string.IsNullOrEmpty(Model.EmploymentType) || !string.IsNullOrEmpty(Model.Salary))
                     {
                         <a asp-action="Index" class="btn btn-secondary" title="Clear Filters">
                             Clear
@@ -118,6 +129,7 @@
                                asp-route-keyword="@Model.Keyword"
                                asp-route-location="@Model.Location"
                                asp-route-employmentType="@Model.EmploymentType"
+                               asp-route-salary="@Model.Salary"
                                asp-route-page="@(Model.PageIndex - 1)">&laquo; Prev</a>
                         </li>
 
@@ -128,6 +140,7 @@
                                    asp-route-keyword="@Model.Keyword"
                                    asp-route-location="@Model.Location"
                                    asp-route-employmentType="@Model.EmploymentType"
+                                   asp-route-salary="@Model.Salary"
                                    asp-route-page="@p">@p</a>
                             </li>
                         }
@@ -137,6 +150,7 @@
                                asp-route-keyword="@Model.Keyword"
                                asp-route-location="@Model.Location"
                                asp-route-employmentType="@Model.EmploymentType"
+                               asp-route-salary="@Model.Salary"
                                asp-route-page="@(Model.PageIndex + 1)">Next &raquo;</a>
                         </li>
                     </ul>

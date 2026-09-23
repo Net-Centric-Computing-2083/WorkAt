@@ -1,0 +1,373 @@
+@model WorkAt.Models.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="py-2">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Page Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 pb-3 border-bottom gap-3">
+        <div>
+            <h1 class="h2 mb-1">System Administration Dashboard</h1>
+            <p class="text-muted mb-0">Platform overview, verification management, and system metrics.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Companies" class="btn btn-secondary">
+                Companies
+            </a>
+            <a asp-action="JobSeekers" class="btn btn-secondary">
+                Job Seekers
+            </a>
+            <a asp-action="Applications" class="btn btn-primary">
+                Applications
+            </a>
+        </div>
+    </div>
+
+    <!-- Core Statistics Matrix -->
+    <div class="row g-3 mb-4">
+        <!-- Companies Metric -->
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-panel h-100 d-flex flex-column">
+                <div class="admin-panel-header">
+                    <span>Companies</span>
+                </div>
+                <div class="admin-panel-body flex-grow-1">
+                    <div class="d-flex align-items-baseline justify-content-between mb-3">
+                        <span class="text-muted small text-uppercase fw-semibold">Total Registered</span>
+                        <span class="h2 fw-bold text-dark mb-0">@Model.TotalCompanies</span>
+                    </div>
+
+                    <div class="border-top pt-2">
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Pending Verification:</span>
+                            <span class="badge badge-pending">@Model.PendingCompanies</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Accepted / Verified:</span>
+                            <span class="badge badge-accepted">@Model.AcceptedCompanies</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Rejected:</span>
+                            <span class="badge badge-rejected">@Model.RejectedCompanies</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-panel-footer">
+                    <a asp-action="Companies" class="text-dark small fw-medium text-decoration-none">
+                        Manage Companies &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Seekers Metric -->
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-panel h-100 d-flex flex-column">
+                <div class="admin-panel-header">
+                    <span>Job Seekers</span>
+                </div>
+                <div class="admin-panel-body flex-grow-1">
+                    <div class="d-flex align-items-baseline justify-content-between mb-3">
+                        <span class="text-muted small text-uppercase fw-semibold">Total Registered</span>
+                        <span class="h2 fw-bold text-dark mb-0">@Model.TotalJobSeekers</span>
+                    </div>
+
+                    <div class="border-top pt-2">
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Pending Verification:</span>
+                            <span class="badge badge-pending">@Model.PendingJobSeekers</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Accepted / Verified:</span>
+                            <span class="badge badge-accepted">@Model.AcceptedJobSeekers</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Rejected:</span>
+                            <span class="badge badge-rejected">@Model.RejectedJobSeekers</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-panel-footer">
+                    <a asp-action="JobSeekers" class="text-dark small fw-medium text-decoration-none">
+                        Manage Candidates &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Postings Metric -->
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-panel h-100 d-flex flex-column">
+                <div class="admin-panel-header">
+                    <span>Job Postings</span>
+                </div>
+                <div class="admin-panel-body flex-grow-1">
+                    <div class="d-flex align-items-baseline justify-content-between mb-3">
+                        <span class="text-muted small text-uppercase fw-semibold">Total Published</span>
+                        <span class="h2 fw-bold text-dark mb-0">@Model.TotalJobs</span>
+                    </div>
+
+                    <div class="border-top pt-2">
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Active Listings:</span>
+                            <span class="badge badge-accepted">@Model.ActiveJobs</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Expired Listings:</span>
+                            <span class="badge badge-rejected">@Model.ExpiredJobs</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-panel-footer">
+                    <a asp-controller="Jobs" asp-action="Index" class="text-dark small fw-medium text-decoration-none">
+                        Browse Public Catalog &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications Metric -->
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-panel h-100 d-flex flex-column">
+                <div class="admin-panel-header">
+                    <span>Applications</span>
+                </div>
+                <div class="admin-panel-body flex-grow-1">
+                    <div class="d-flex align-items-baseline justify-content-between mb-3">
+                        <span class="text-muted small text-uppercase fw-semibold">Total Submitted</span>
+                        <span class="h2 fw-bold text-dark mb-0">@Model.TotalApplications</span>
+                    </div>
+
+                    <div class="border-top pt-2">
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Pending Review:</span>
+                            <span class="badge badge-pending">@Model.PendingApplications</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Accepted:</span>
+                            <span class="badge badge-accepted">@Model.AcceptedApplications</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-1 small">
+                            <span class="text-muted">Rejected:</span>
+                            <span class="badge badge-rejected">@Model.RejectedApplications</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-panel-footer">
+                    <a asp-action="Applications" class="text-dark small fw-medium text-decoration-none">
+                        View Applications Log &rarr;
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Queues -->
+    <div class="row g-4 mb-4">
+        <!-- Pending Companies Table -->
+        <div class="col-lg-6">
+            <div class="admin-panel h-100">
+                <div class="admin-panel-header d-flex justify-content-between align-items-center">
+                    <span>Pending Company Verifications (@Model.PendingCompanies)</span>
+                    <a asp-action="Companies" asp-route-status="Pending" class="btn btn-sm btn-outline-secondary">View All</a>
+                </div>
+                <div>
+                    @if (Model.RecentPendingCompanies.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Company</th>
+                                        <th>Registered</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var c in Model.RecentPendingCompanies)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-semibold text-dark">
+                                                    <a asp-action="CompanyDetails" asp-route-id="@c.CompanyId" class="text-dark text-decoration-none">
+                                                        @c.CompanyName
+                                                    </a>
+                                                </div>
+                                                <div class="text-muted small">@(c.User?.Email ?? "N/A")</div>
+                                            </td>
+                                            <td class="text-muted small">
+                                                @c.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="d-inline-flex gap-1">
+                                                    <form asp-action="VerifyCompany" asp-route-id="@c.CompanyId" asp-route-returnUrl="@Url.Action("Index")" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Verify Company">Verify</button>
+                                                    </form>
+                                                    <form asp-action="RejectCompany" asp-route-id="@c.CompanyId" asp-route-returnUrl="@Url.Action("Index")" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-danger" title="Reject Company">Reject</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted small">
+                            No companies currently awaiting verification.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Job Seekers Table -->
+        <div class="col-lg-6">
+            <div class="admin-panel h-100">
+                <div class="admin-panel-header d-flex justify-content-between align-items-center">
+                    <span>Pending Candidate Verifications (@Model.PendingJobSeekers)</span>
+                    <a asp-action="JobSeekers" asp-route-status="Pending" class="btn btn-sm btn-outline-secondary">View All</a>
+                </div>
+                <div>
+                    @if (Model.RecentPendingJobSeekers.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Candidate</th>
+                                        <th>Registered</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var js in Model.RecentPendingJobSeekers)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-semibold text-dark">
+                                                    <a asp-action="JobSeekerDetails" asp-route-id="@js.JobSeekerId" class="text-dark text-decoration-none">
+                                                        @js.FirstName @js.LastName
+                                                    </a>
+                                                </div>
+                                                <div class="text-muted small">@(js.User?.Email ?? "N/A")</div>
+                                            </td>
+                                            <td class="text-muted small">
+                                                @js.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="d-inline-flex gap-1">
+                                                    <form asp-action="VerifyJobSeeker" asp-route-id="@js.JobSeekerId" asp-route-returnUrl="@Url.Action("Index")" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Verify Job Seeker">Verify</button>
+                                                    </form>
+                                                    <form asp-action="RejectJobSeeker" asp-route-id="@js.JobSeekerId" asp-route-returnUrl="@Url.Action("Index")" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-sm btn-danger" title="Reject Job Seeker">Reject</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted small">
+                            No job seekers currently awaiting verification.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications Overview -->
+    <div class="admin-panel mb-4">
+        <div class="admin-panel-header d-flex justify-content-between align-items-center">
+            <span>Recent Platform Applications</span>
+            <a asp-action="Applications" class="btn btn-sm btn-outline-secondary">View All Applications</a>
+        </div>
+        <div>
+            @if (Model.RecentApplications.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Candidate</th>
+                                <th>Position</th>
+                                <th>Company</th>
+                                <th>Submitted Date</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var app in Model.RecentApplications)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold text-dark">
+                                            @app.JobSeeker?.FirstName @app.JobSeeker?.LastName
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark">@(app.Job?.Title ?? "Unknown Position")</span>
+                                    </td>
+                                    <td class="text-muted small">
+                                        @(app.Job?.Company?.CompanyName ?? "Unknown Company")
+                                    </td>
+                                    <td class="text-muted small">
+                                        @app.AppliedDate.ToLocalTime().ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td>
+                                        @if (app.Status == "Accepted")
+                                        {
+                                            <span class="badge badge-accepted">Accepted</span>
+                                        }
+                                        else if (app.Status == "Rejected")
+                                        {
+                                            <span class="badge badge-rejected">Rejected</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-pending">Pending</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="ApplicationDetails" asp-route-id="@app.ApplicationId" class="btn btn-sm btn-outline-secondary">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted small">
+                    No applications have been submitted yet.
+                </div>
+            }
+        </div>
+    </div>
+</div>
